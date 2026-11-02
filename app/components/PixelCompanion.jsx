@@ -93,11 +93,11 @@ export default function PixelCompanion({
         bottom: `${currentAltitude}px`,
       }}
     >
-      {/* Speech bubble (always upright, never mirrored) */}
+      {/* Speech bubble (always upright, centered over ship) */}
       {bubbleVisible && (
-        <div className="absolute -top-12 -left-12 z-40 whitespace-nowrap bg-[#1b1d26]/95 border border-[#fe8500] text-[#fe8500] text-[11px] font-mono px-2.5 py-1 rounded-md shadow-[0_0_12px_rgba(254,133,0,0.35)] backdrop-blur-sm pointer-events-none animate-fadeIn">
+        <div className="absolute -top-11 left-1/2 -translate-x-1/2 z-40 whitespace-nowrap bg-[#1b1d26]/95 border border-[#fe8500] text-[#fe8500] text-[10px] sm:text-[11px] font-mono px-2 sm:px-2.5 py-1 rounded-md shadow-[0_0_12px_rgba(254,133,0,0.35)] backdrop-blur-sm pointer-events-none animate-fadeIn">
           {bubbleText}
-          <div className="absolute -bottom-1.5 left-14 w-2 h-2 bg-[#1b1d26] border-r border-b border-[#fe8500] rotate-45 transform" />
+          <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-2 h-2 bg-[#1b1d26] border-r border-b border-[#fe8500] rotate-45 transform" />
         </div>
       )}
 

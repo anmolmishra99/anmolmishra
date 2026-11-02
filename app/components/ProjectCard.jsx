@@ -74,7 +74,7 @@ export default function ProjectCard({
         </div>
 
         {/* Narrative Description */}
-        <p className="text-sm text-zinc-300 leading-relaxed font-normal">
+        <p className="text-[13px] sm:text-sm text-zinc-300 leading-relaxed font-normal">
           {description}
         </p>
 
@@ -83,18 +83,18 @@ export default function ProjectCard({
           <div className="pt-1">
             <button
               onClick={toggleExpand}
-              className="text-xs text-zinc-400 hover:text-[#fe8500] flex items-center gap-1 transition-colors"
+              className="text-xs text-zinc-400 hover:text-[#fe8500] flex items-center gap-1 transition-colors py-1"
             >
               <span>{expanded ? "Hide details" : "Key engineering highlights"}</span>
               <ChevronDown
                 className={`w-3.5 h-3.5 transition-transform duration-200 ${
-                  expanded ? "rotate-180" : ""
+                  expanded ? "rotate-180 text-[#fe8500]" : ""
                 }`}
               />
             </button>
 
             {expanded && (
-              <ul className="mt-2.5 space-y-2 border-l border-[#2e3242] pl-3.5 text-xs text-zinc-300">
+              <ul className="mt-2.5 space-y-2 border-l border-[#2e3242] pl-3.5 text-[12px] sm:text-xs text-zinc-300">
                 {bullets.map((bullet, idx) => (
                   <li key={idx} className="leading-relaxed">
                     <span className="text-[#fe8500] mr-1.5 font-bold">▪</span>
@@ -112,7 +112,7 @@ export default function ProjectCard({
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="text-[11px] font-mono px-2 py-0.5 rounded bg-[#1b1d26] border border-[#2e3242] text-zinc-300 hover:border-[#105bff] hover:text-white transition-colors"
+                className="text-[10px] sm:text-[11px] font-mono px-2 py-0.5 rounded bg-[#1b1d26] border border-[#2e3242] text-zinc-300 hover:border-[#105bff] hover:text-white transition-colors"
               >
                 {tag}
               </span>

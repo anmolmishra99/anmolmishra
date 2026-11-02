@@ -37,7 +37,6 @@ function LinkedinIcon({ className = "w-3.5 h-3.5" }) {
 
 import PixelSky from "./components/PixelSky";
 import ProjectCard from "./components/ProjectCard";
-import AskAiModal from "./components/AskAiModal";
 import AquariumRain from "./components/AquariumRain";
 import PixelCompanion from "./components/PixelCompanion";
 import { playPixelBlip, playPixelChirp } from "./components/SoundEffects";
@@ -45,7 +44,6 @@ import anmolAvatar from "../public/anmol-avatar.jpg";
 
 export default function Home() {
   const [soundEnabled, setSoundEnabled] = useState(true);
-  const [aiModalOpen, setAiModalOpen] = useState(false);
   const [photoOpen, setPhotoOpen] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [rainBurst, setRainBurst] = useState(0);
@@ -68,13 +66,15 @@ export default function Home() {
         <div className="absolute top-1/2 -left-32 w-80 h-80 bg-[#105bff]/15 rounded-full blur-3xl" />
       </div>
 
-      {/* Animated Pixel Sky (Floating in Top-Right Sky, Clear of All Text) */}
-      <div className="absolute top-3 right-3 sm:top-6 sm:right-6 md:right-12 lg:right-20 z-20 pointer-events-auto scale-85 sm:scale-100 origin-top-right">
-        <PixelSky
-          isCreative={true}
-          soundEnabled={soundEnabled}
-          onCloudClick={() => setRainBurst((prev) => prev + 1)}
-        />
+      {/* Animated Pixel Sky (On mobile sits gracefully in top sky row; on desktop floats absolute top-right) */}
+      <div className="w-full flex justify-end pr-2 pt-2 sm:pt-0 sm:pr-0 sm:absolute sm:top-6 sm:right-6 md:right-12 lg:right-20 z-20 pointer-events-auto">
+        <div className="scale-75 sm:scale-90 md:scale-100 origin-top-right">
+          <PixelSky
+            isCreative={true}
+            soundEnabled={soundEnabled}
+            onCloudClick={() => setRainBurst((prev) => prev + 1)}
+          />
+        </div>
       </div>
 
       {/* Aquarium Rain & Water Floor System */}
@@ -91,9 +91,9 @@ export default function Home() {
         isCreative={true}
       />
 
-      <main className="max-w-2xl mx-auto px-5 pt-16 pb-24 md:pt-20">
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-2 sm:pt-16 md:pt-20 pb-32 sm:pb-36">
         {/* HERO / PROFILE HEADER */}
-        <div className="flex items-start gap-4 pb-6">
+        <div className="flex items-start gap-3 sm:gap-4 pb-5 sm:pb-6">
           {/* Avatar */}
           <div className="relative group shrink-0">
             <button
@@ -101,7 +101,7 @@ export default function Home() {
                 if (soundEnabled) playPixelBlip(640, "sine", 0.04);
                 setPhotoOpen(true);
               }}
-              className="w-20 h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border border-[#2e3242] bg-[#1b1d26] shadow-xl relative block text-left cursor-zoom-in transition-all group-hover:border-[#105bff]/60 group-hover:shadow-[0_0_15px_rgba(16,91,255,0.25)]"
+              className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border border-[#2e3242] bg-[#1b1d26] shadow-xl relative block text-left cursor-zoom-in transition-all group-hover:border-[#105bff]/60 group-hover:shadow-[0_0_15px_rgba(16,91,255,0.25)]"
               title="Click to view full photo"
             >
               <Image
@@ -115,29 +115,29 @@ export default function Home() {
           </div>
 
           {/* Name & Title */}
-          <div className="space-y-1 flex-1">
-            <h1 className="text-2xl md:text-3xl font-semibold text-white tracking-tight">
+          <div className="space-y-1 flex-1 min-w-0">
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-white tracking-tight break-words">
               Anmol Mishra
             </h1>
-            <p className="text-sm md:text-base text-zinc-300 font-normal">
+            <p className="text-xs sm:text-sm md:text-base text-zinc-300 font-normal leading-snug">
               AI/ML Engineer · Full-Stack Developer · Technical Lead
             </p>
-            <div className="flex flex-wrap items-center gap-2 pt-0.5 text-xs text-zinc-400 font-mono">
+            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-0.5 text-[11px] sm:text-xs text-zinc-400 font-mono">
               <span className="inline-flex items-center gap-1 text-zinc-400">
-                <MapPin className="w-3 h-3 text-[#fe8500]" />
-                Noida / Mau, India
+                <MapPin className="w-3 h-3 text-[#fe8500] shrink-0" />
+                <span>Noida / Mau, India</span>
               </span>
-              <span className="text-zinc-600">•</span>
+              <span className="text-zinc-600 hidden sm:inline">•</span>
               <span className="text-[#105bff] font-semibold">3+ Years Production AI</span>
-              <span className="text-zinc-600">•</span>
+              <span className="text-zinc-600 hidden sm:inline">•</span>
               <span className="text-[#fe8500] font-semibold">2 Acquired SaaS</span>
             </div>
           </div>
         </div>
 
         {/* BIO & EDITORIAL MANIFESTO */}
-        <div className="space-y-4 pt-4 text-sm md:text-[15px] leading-relaxed text-zinc-300 font-normal border-b border-[#2e3242] pb-10">
-          <p className="text-white font-medium text-base">
+        <div className="space-y-3.5 sm:space-y-4 pt-3 sm:pt-4 text-[13px] sm:text-sm md:text-[15px] leading-relaxed text-zinc-300 font-normal border-b border-[#2e3242] pb-8 sm:pb-10">
+          <p className="text-white font-medium text-sm sm:text-base leading-relaxed">
             Real-world AI isn&apos;t demo-ware. It&apos;s high-uptime, fault-tolerant infrastructure delivering measurable human impact.
           </p>
 
@@ -235,22 +235,22 @@ export default function Home() {
           </p>
 
           {/* Quick Connect & Action Pills */}
-          <div className="flex flex-wrap items-center gap-2 pt-2">
+          <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-2">
             <button
               onClick={handleCopyEmail}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1b1d26] border border-[#2e3242] text-xs font-mono text-zinc-200 hover:border-[#105bff] hover:text-[#fe8500] transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#1b1d26] border border-[#2e3242] text-[11px] sm:text-xs font-mono text-zinc-200 hover:border-[#105bff] hover:text-[#fe8500] transition-colors shadow-sm max-w-full"
               title="Click to copy email address"
             >
               {copiedEmail ? (
                 <>
-                  <Check className="w-3.5 h-3.5 text-[#fe8500]" />
-                  <span className="text-[#fe8500]">Copied mishraanmol258@gmail.com</span>
+                  <Check className="w-3.5 h-3.5 text-[#fe8500] shrink-0" />
+                  <span className="text-[#fe8500] truncate">Copied mishraanmol258@gmail.com</span>
                 </>
               ) : (
                 <>
-                  <Mail className="w-3.5 h-3.5 text-[#105bff]" />
-                  <span>mishraanmol258@gmail.com</span>
-                  <Copy className="w-3 h-3 text-zinc-500" />
+                  <Mail className="w-3.5 h-3.5 text-[#105bff] shrink-0" />
+                  <span className="truncate">mishraanmol258@gmail.com</span>
+                  <Copy className="w-3 h-3 text-zinc-500 shrink-0" />
                 </>
               )}
             </button>
@@ -259,9 +259,9 @@ export default function Home() {
               href="/Anmol_Mishra_Resume_2026.pdf"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1b1d26] border border-[#2e3242] text-xs font-mono text-zinc-200 hover:border-[#105bff] hover:text-white transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#1b1d26] border border-[#2e3242] text-[11px] sm:text-xs font-mono text-zinc-200 hover:border-[#105bff] hover:text-white transition-colors shadow-sm"
             >
-              <FileDown className="w-3.5 h-3.5 text-[#105bff]" />
+              <FileDown className="w-3.5 h-3.5 text-[#105bff] shrink-0" />
               <span>Resume PDF</span>
             </a>
 
@@ -269,9 +269,9 @@ export default function Home() {
               href="https://linkedin.com/in/anmolmishra99"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1b1d26] border border-[#2e3242] text-xs font-mono text-zinc-200 hover:border-[#105bff] hover:text-white transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#1b1d26] border border-[#2e3242] text-[11px] sm:text-xs font-mono text-zinc-200 hover:border-[#105bff] hover:text-white transition-colors shadow-sm"
             >
-              <LinkedinIcon className="w-3.5 h-3.5 text-[#105bff]" />
+              <LinkedinIcon className="w-3.5 h-3.5 text-[#105bff] shrink-0" />
               <span>LinkedIn</span>
             </a>
 
@@ -279,23 +279,13 @@ export default function Home() {
               href="https://github.com/anmolmishra99"
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#1b1d26] border border-[#2e3242] text-xs font-mono text-zinc-200 hover:border-[#105bff] hover:text-white transition-colors shadow-sm"
+              className="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg bg-[#1b1d26] border border-[#2e3242] text-[11px] sm:text-xs font-mono text-zinc-200 hover:border-[#105bff] hover:text-white transition-colors shadow-sm"
             >
-              <GithubIcon className="w-3.5 h-3.5 text-[#105bff]" />
+              <GithubIcon className="w-3.5 h-3.5 text-[#105bff] shrink-0" />
               <span>GitHub</span>
             </a>
 
-            <button
-              onClick={() => {
-                if (soundEnabled) playPixelBlip(880, "sine", 0.06);
-                setAiModalOpen(true);
-              }}
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#105bff] text-white text-xs font-mono hover:bg-[#105bff]/90 transition-all shadow-[0_0_14px_rgba(16,91,255,0.4)]"
-              title="Chat with Anmol's resume AI agent"
-            >
-              <Sparkles className="w-3.5 h-3.5 text-[#fe8500]" />
-              <span>Ask AI</span>
-            </button>
+
           </div>
         </div>
 
@@ -544,21 +534,18 @@ export default function Home() {
               </p>
             </div>
 
-            <button
-              onClick={() => {
-                if (soundEnabled) playPixelBlip(880, "sine", 0.06);
-                setAiModalOpen(true);
-              }}
-              className="px-3.5 py-1.5 rounded-lg bg-[#105bff] hover:bg-[#105bff]/90 text-white text-xs font-mono flex items-center gap-1.5 transition-all shadow-[0_0_16px_rgba(16,91,255,0.4)]"
+            <a
+              href="mailto:mishraanmol258@gmail.com"
+              className="px-3.5 py-2 rounded-lg bg-[#105bff] hover:bg-[#105bff]/90 text-white text-xs font-mono inline-flex items-center gap-1.5 transition-all shadow-[0_0_16px_rgba(16,91,255,0.4)] w-fit"
             >
-              <Sparkles className="w-3.5 h-3.5 text-[#fe8500]" />
-              <span>Ask Anmol&apos;s AI</span>
-            </button>
+              <Mail className="w-3.5 h-3.5 text-[#fe8500]" />
+              <span>Get in Touch</span>
+            </a>
           </div>
 
           {/* Contact Bar */}
-          <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-[#2e3242]/70 text-xs text-zinc-400 font-mono">
-            <div className="flex items-center gap-4">
+          <div className="flex flex-wrap items-center justify-between gap-3 sm:gap-4 pt-4 border-t border-[#2e3242]/70 text-[11px] sm:text-xs text-zinc-400 font-mono">
+            <div className="flex flex-wrap items-center gap-3 sm:gap-4">
               <a
                 href="mailto:mishraanmol258@gmail.com"
                 className="hover:text-[#fe8500] transition-colors flex items-center gap-1"
@@ -600,13 +587,6 @@ export default function Home() {
           </div>
         </footer>
       </main>
-
-      {/* Interactive AI Chat Modal */}
-      <AskAiModal
-        isOpen={aiModalOpen}
-        onClose={() => setAiModalOpen(false)}
-        soundEnabled={soundEnabled}
-      />
 
       {/* Full Photo Lightbox Modal */}
       {photoOpen && (
