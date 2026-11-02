@@ -6,6 +6,7 @@ import { playWaterPlop } from "./SoundEffects";
 export default function AquariumRain({
   soundEnabled = true,
   rainBurstTrigger = 0,
+  onWaterHeightChange,
 }) {
   const canvasRef = useRef(null);
 
@@ -38,7 +39,10 @@ export default function AquariumRain({
   useEffect(() => {
     waterHeightRef.current = waterHeight;
     setDisplayPercent(Math.min(100, Math.round((waterHeight / MAX_WATER_HEIGHT) * 100)));
-  }, [waterHeight]);
+    if (onWaterHeightChange) {
+      onWaterHeightChange(waterHeight);
+    }
+  }, [waterHeight, onWaterHeightChange]);
 
   // Find onscreen bounds of PixelSky clouds
   const getCloudRects = useCallback(() => {

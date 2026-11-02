@@ -1,82 +1,138 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { playPixelChirp, playPixelBlip } from "./SoundEffects";
 
 const QUOTES = [
+  "Flapping high above the water! 🌊",
   "21.6K+ citizen chats delivered! ⚡",
   "100+ active stores on Payge 🛒",
   "2 SaaS products acquired in 2024! 🚀",
   "₹7,531 Cr compensation tracked 🏛️",
-  "RAG + CrewAI multi-agent architecture 🤖",
-  "Hi! I'm Anmol's pixel companion 🦉",
+  "Hop hop! Anmol's pixel companion 🦉",
+  "Wheee! 🪽",
 ];
 
-export default function PixelCompanion({ soundEnabled = true, isCreative = false }) {
+export default function PixelCompanion({
+  waterHeight = 0,
+  soundEnabled = true,
+  isCreative = true,
+}) {
+  const [posX, setPosX] = useState(120);
+  const [direction, setDirection] = useState(1); // 1 = right, -1 = left
   const [frame, setFrame] = useState(0);
+  const [isJumping, setIsJumping] = useState(false);
+  const [jumpOffset, setJumpOffset] = useState(0);
   const [bubbleText, setBubbleText] = useState("");
   const [bubbleVisible, setBubbleVisible] = useState(false);
-  const [isSpinning, setIsSpinning] = useState(false);
   const [quoteIdx, setQuoteIdx] = useState(0);
 
-  // Wing flapping animation cycle
+  // Horizontal flying across the bottom of the screen
   useEffect(() => {
-    const interval = setInterval(() => {
-      setFrame((prev) => (prev + 1) % 4);
-    }, 180);
-    return () => clearInterval(interval);
-  }, []);
+    const flightTimer = setInterval(() => {
+      const winW = typeof window !== "undefined" ? window.innerWidth : 1200;
+      setPosX((prevX) => {
+        let nextX = prevX + direction * 1.4;
+        if (nextX >= winW - 55) {
+          setDirection(-1);
+          return winW - 55;
+        } else if (nextX <= 15) {
+          setDirection(1);
+          return 15;
+        }
+        return nextX;
+      });
+    }, 30);
 
-  const handleClick = () => {
+    return () => clearInterval(flightTimer);
+  }, [direction]);
+
+  // Wing flapping animation (faster during jump)
+  useEffect(() => {
+    const flapSpeed = isJumping ? 75 : 150;
+    const flapTimer = setInterval(() => {
+      setFrame((prev) => (prev + 1) % 4);
+    }, flapSpeed);
+
+    return () => clearInterval(flapTimer);
+  }, [isJumping]);
+
+  // Click to jump high into the air
+  const handleJump = (e) => {
+    e.stopPropagation();
     if (soundEnabled) playPixelChirp();
-    setIsSpinning(true);
+
+    setIsJumping(true);
+    setJumpOffset(54); // Jump hop upwards!
     setBubbleText(QUOTES[quoteIdx]);
     setQuoteIdx((prev) => (prev + 1) % QUOTES.length);
     setBubbleVisible(true);
 
-    setTimeout(() => setIsSpinning(false), 600);
-    setTimeout(() => setBubbleVisible(false), 3400);
+    // Gravity glide down
+    setTimeout(() => {
+      setJumpOffset(0);
+    }, 280);
+
+    setTimeout(() => {
+      setIsJumping(false);
+    }, 550);
+
+    setTimeout(() => {
+      setBubbleVisible(false);
+    }, 2400);
   };
 
+  // Base altitude: always floats safely a step above the water level
+  const altitudeFromBottom = waterHeight + 24 + jumpOffset;
+
   return (
-    <div className="relative inline-block select-none pointer-events-auto">
-      {/* Pixel Speech Bubble */}
+    <div
+      className="fixed z-30 pointer-events-none select-none transition-[bottom] duration-300 ease-out"
+      style={{
+        left: `${posX}px`,
+        bottom: `${altitudeFromBottom}px`,
+      }}
+    >
+      {/* Speech bubble (always upright, not mirrored) */}
       {bubbleVisible && (
-        <div
-          className="absolute -top-12 -left-6 z-30 whitespace-nowrap bg-[#1b1d26] border border-[#fe8500] text-[#fe8500] text-[11px] font-mono px-2.5 py-1 rounded shadow-[0_0_12px_rgba(254,133,0,0.3)] backdrop-blur-sm animate-fade-in"
-          style={{ imageRendering: "pixelated" }}
-        >
+        <div className="absolute -top-11 -left-10 z-40 whitespace-nowrap bg-[#1b1d26]/95 border border-[#fe8500] text-[#fe8500] text-[11px] font-mono px-2.5 py-1 rounded-md shadow-[0_0_12px_rgba(254,133,0,0.35)] backdrop-blur-sm pointer-events-none animate-fadeIn">
           {bubbleText}
-          <div className="absolute -bottom-1.5 left-8 w-2 h-2 bg-[#1b1d26] border-r border-b border-[#fe8500] rotate-45 transform" />
+          <div className="absolute -bottom-1.5 left-12 w-2 h-2 bg-[#1b1d26] border-r border-b border-[#fe8500] rotate-45 transform" />
         </div>
       )}
 
-      {/* Interactive Bird Companion Container */}
+      {/* Clickable Bird Sprite (flips facing direction) */}
       <div
-        onClick={handleClick}
-        className={`group relative cursor-pointer transition-transform duration-300 ${
-          isSpinning ? "rotate-[360deg] scale-125" : "hover:scale-115 active:scale-95"
-        }`}
+        onClick={handleJump}
+        className="pointer-events-auto cursor-pointer group transition-transform duration-150 active:scale-90"
         style={{
-          animation: "pixelCompanionHover 2.4s ease-in-out infinite",
+          transform: `scaleX(${direction}) ${isJumping ? "scale(1.15)" : ""}`,
         }}
-        title="Click me for a secret!"
+        title="Click me to jump! 🪽"
       >
-        {/* Glow behind companion in Creative Mode */}
-        {isCreative && (
-          <div className="absolute inset-0 bg-[#105bff]/30 rounded-full blur-md -z-10 animate-pulse shadow-[0_0_16px_#fe8500]" />
-        )}
-
-        {/* The Pixel Bird Sprite */}
-        <PixelBirdSVG frame={frame} />
-
-        {/* Pixel Shadow underneath */}
         <div
-          className="mx-auto w-6 h-1 bg-black/40 rounded-full blur-[1px] mt-0.5"
+          className="relative"
           style={{
-            animation: "pixelShadowSquash 2.4s ease-in-out infinite",
+            animation: isJumping ? "none" : "pixelCompanionHover 2s ease-in-out infinite",
           }}
-        />
+        >
+          {/* Subtle Royal Blue / Orange glow */}
+          {isCreative && (
+            <div className="absolute inset-0 bg-[#105bff]/30 rounded-full blur-md -z-10 animate-pulse shadow-[0_0_14px_#fe8500]" />
+          )}
+
+          {/* Authentic Pixel Bird Sprite */}
+          <PixelBirdSVG frame={frame} />
+
+          {/* Shadow beneath bird (visible when near floor/water surface) */}
+          <div
+            className="mx-auto w-6 h-1 bg-black/40 rounded-full blur-[1px] mt-0.5 opacity-60"
+            style={{
+              transform: `scale(${Math.max(0.4, 1 - jumpOffset / 80)})`,
+              transition: "transform 0.2s ease",
+            }}
+          />
+        </div>
       </div>
     </div>
   );
@@ -85,10 +141,7 @@ export default function PixelCompanion({ soundEnabled = true, isCreative = false
 // Authentic 20x18 Pixel Art Bird / Owl Sprite
 function PixelBirdSVG({ frame }) {
   // Wing positions based on frame:
-  // frame 0: neutral
-  // frame 1: wing up
-  // frame 2: wing high
-  // frame 3: wing down
+  // frame 0: neutral, 1: wing up, 2: wing high, 3: wing down
   const wingY = frame === 1 ? -1 : frame === 2 ? -2 : frame === 3 ? 1 : 0;
 
   return (

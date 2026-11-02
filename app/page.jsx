@@ -39,6 +39,7 @@ import PixelSky from "./components/PixelSky";
 import ProjectCard from "./components/ProjectCard";
 import AskAiModal from "./components/AskAiModal";
 import AquariumRain from "./components/AquariumRain";
+import PixelCompanion from "./components/PixelCompanion";
 import { playPixelBlip, playPixelChirp } from "./components/SoundEffects";
 import anmolAvatar from "../public/anmol-avatar.jpg";
 
@@ -48,6 +49,7 @@ export default function Home() {
   const [photoOpen, setPhotoOpen] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
   const [rainBurst, setRainBurst] = useState(0);
+  const [waterHeight, setWaterHeight] = useState(0);
 
   const email = "mishraanmol258@gmail.com";
 
@@ -79,6 +81,14 @@ export default function Home() {
       <AquariumRain
         soundEnabled={soundEnabled}
         rainBurstTrigger={rainBurst}
+        onWaterHeightChange={setWaterHeight}
+      />
+
+      {/* Flying Pixel Companion across bottom (flies, jumps on click, automatically steps above rising water) */}
+      <PixelCompanion
+        waterHeight={waterHeight}
+        soundEnabled={soundEnabled}
+        isCreative={true}
       />
 
       <main className="max-w-2xl mx-auto px-5 pt-16 pb-24 md:pt-20">
@@ -316,7 +326,7 @@ export default function Home() {
               tags={["Next.js", "Firebase", "Tailwind CSS", "Razorpay Route", "Instagram API", "LLM Agents"]}
               link="https://payge.store"
               linkText="payge.store →"
-              hasCompanion={true} // Animated pixel companion sits beside the metric as in the reference image!
+              hasCompanion={false}
               soundEnabled={soundEnabled}
               isCreative={true}
             />
