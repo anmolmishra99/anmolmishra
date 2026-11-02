@@ -35,14 +35,17 @@ export default function AquariumRain({
 
   const MAX_WATER_HEIGHT = 140; // max floor aquarium fill height (~18% of typical screen)
 
+  const onWaterHeightChangeRef = useRef(onWaterHeightChange);
+  onWaterHeightChangeRef.current = onWaterHeightChange;
+
   // Sync ref & percent
   useEffect(() => {
     waterHeightRef.current = waterHeight;
     setDisplayPercent(Math.min(100, Math.round((waterHeight / MAX_WATER_HEIGHT) * 100)));
-    if (onWaterHeightChange) {
-      onWaterHeightChange(waterHeight);
+    if (onWaterHeightChangeRef.current) {
+      onWaterHeightChangeRef.current(waterHeight);
     }
-  }, [waterHeight, onWaterHeightChange]);
+  }, [waterHeight]);
 
   // Find onscreen bounds of PixelSky clouds
   const getCloudRects = useCallback(() => {

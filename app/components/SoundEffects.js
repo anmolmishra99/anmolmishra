@@ -103,3 +103,32 @@ export function playWaterPlop() {
     osc.stop(ctx.currentTime + 0.06);
   } catch (e) {}
 }
+
+export function playBoatHorn() {
+  try {
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const osc1 = ctx.createOscillator();
+    const osc2 = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc1.type = "sawtooth";
+    osc2.type = "sine";
+    // Warm retro 8-bit boat horn interval
+    osc1.frequency.setValueAtTime(185, ctx.currentTime);
+    osc2.frequency.setValueAtTime(233, ctx.currentTime);
+
+    gain.gain.setValueAtTime(0.04, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(0.05, ctx.currentTime + 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.32);
+
+    osc1.connect(gain);
+    osc2.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc1.start();
+    osc2.start();
+    osc1.stop(ctx.currentTime + 0.32);
+    osc2.stop(ctx.currentTime + 0.32);
+  } catch (e) {}
+}

@@ -76,6 +76,18 @@ body {
   }
 }
 
+@keyframes pixelShipRock {
+  0% {
+    transform: translateY(0px) rotate(-2.5deg);
+  }
+  50% {
+    transform: translateY(-3px) rotate(2deg);
+  }
+  100% {
+    transform: translateY(1px) rotate(-2deg);
+  }
+}
+
 @keyframes pixelShadowSquash {
   0%, 100% {
     transform: scaleX(1);
