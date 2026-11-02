@@ -436,18 +436,18 @@ export default function AquariumRain({
           <div className="absolute bottom-2.5 right-4 pointer-events-auto flex items-center gap-2 select-none">
             <div className="flex items-center gap-1.5 bg-[#171923]/90 border border-[#2e3242] rounded-lg px-2.5 py-1 text-xs font-mono shadow-lg backdrop-blur-md">
               <span className="text-[#38bdf8]">💧</span>
-              <span className="text-zinc-300 text-[11px]">
+              {/* <span className="text-zinc-300 text-[11px]">
                 {Math.round(waterHeight)}px ({displayPercent}%)
-              </span>
+              </span> */}
 
               {/* Click to drop button */}
-              <button
+              {/* <button
                 onClick={handleManualDropClick}
                 className="ml-1 text-[10px] text-[#fe8500] hover:text-white transition-colors px-1"
                 title="Click to drop rain"
               >
                 + Drop
-              </button>
+              </button> */}
 
               <span className="text-zinc-600">|</span>
 
@@ -458,7 +458,7 @@ export default function AquariumRain({
                 className="text-[10px] text-zinc-400 hover:text-rose-400 transition-colors px-1"
                 title="Drain water back to dry floor"
               >
-                {isDraining ? "Draining..." : "Drain"}
+                {isDraining ? "Draining..." : "Drain 🕳️"}
               </button>
             </div>
           </div>

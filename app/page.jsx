@@ -752,16 +752,13 @@ export default function Home() {
               </p>
             </div>
 
-            <div className="flex items-center gap-2">
-              <HighlightPill variant="orange" icon="⚡">Open for Tech Lead &amp; Advisory</HighlightPill>
-              <a
-                href="mailto:mishraanmol258@gmail.com"
-                className="px-3.5 py-1.5 rounded-lg bg-[#105bff] hover:bg-[#105bff]/90 text-white text-xs font-mono flex items-center gap-1.5 transition-all shadow-[0_0_16px_rgba(16,91,255,0.4)]"
-              >
-                <Mail className="w-3.5 h-3.5 text-white" />
-                <span>Get in Touch</span>
-              </a>
-            </div>
+            <a
+              href="mailto:mishraanmol258@gmail.com"
+              className="w-full sm:w-auto px-6 sm:px-8 py-2.5 rounded-xl bg-[#105bff] hover:bg-[#105bff]/90 text-white text-xs sm:text-sm font-mono flex items-center justify-center gap-2 transition-all shadow-[0_0_20px_rgba(16,91,255,0.45)] hover:shadow-[0_0_28px_rgba(16,91,255,0.7)] hover:scale-[1.02] shrink-0"
+            >
+              <Mail className="w-4 h-4 text-white" />
+              <span>Get in Touch</span>
+            </a>
           </div>
 
           {/* Contact Bar */}
