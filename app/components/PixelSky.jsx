@@ -9,17 +9,24 @@ export default function PixelSky({
   onCloudClick,
 }) {
   const [moonClicked, setMoonClicked] = useState(false);
+  const [justTapped, setJustTapped] = useState(false);
 
   const handleMoonClick = () => {
     if (soundEnabled) playPixelChirp();
     if (onCloudClick) onCloudClick();
     setMoonClicked(true);
-    setTimeout(() => setMoonClicked(false), 1200);
+    setJustTapped(true);
+    setTimeout(() => {
+      setMoonClicked(false);
+      setJustTapped(false);
+    }, 1400);
   };
 
   const handleCloudClick = (e) => {
     if (soundEnabled) playPixelBlip(780, "square", 0.05);
     if (onCloudClick) onCloudClick();
+    setJustTapped(true);
+    setTimeout(() => setJustTapped(false), 1400);
   };
 
   return (
@@ -146,6 +153,21 @@ export default function PixelSky({
       >
         <PixelSmallCloud width={68} height={34} />
       </div>
+
+      {/* Tap Here on Clouds Indicator */}
+      <button
+        onClick={handleCloudClick}
+        className="absolute top-[64px] right-3 sm:right-4 flex items-center gap-1 px-2.5 py-0.5 rounded-full bg-[#131b31]/95 border border-[#3b4d7c] text-[#8ea8f7] text-[11px] font-mono shadow-[0_0_14px_rgba(16,91,255,0.45)] hover:border-[#105bff] hover:text-white hover:scale-105 active:scale-95 transition-all select-none cursor-pointer group"
+        style={{ animation: "pixelBob 2.2s ease-in-out infinite" }}
+        title="Tap cloud to make it rain!"
+      >
+        <span className="text-[11px] group-hover:-translate-y-0.5 transition-transform">
+          {justTapped ? "🌧️" : "👆"}
+        </span>
+        <span className="font-bold tracking-tight">
+          {justTapped ? "raining!" : "tap here"}
+        </span>
+      </button>
     </div>
   );
 }
