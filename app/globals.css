@@ -1,8 +1,12 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #21232e;
+  --foreground: #f1f3f9;
+  --royal-blue: #105bff;
+  --orange: #fe8500;
+  --surface: #1b1d26;
+  --surface-border: #2e3242;
 }
 
 @theme inline {
@@ -12,15 +16,141 @@
   --font-mono: var(--font-geist-mono);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+body {
+  background: #21232e;
+  color: #f1f3f9;
+  font-family: var(--font-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  overflow-x: hidden;
+}
+
+::selection {
+  background-color: #105bff;
+  color: #ffffff;
+}
+
+.pixelated {
+  image-rendering: pixelated;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: crisp-edges;
+}
+
+@keyframes pixelFloatMoon {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-4px);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+@keyframes pixelDriftMain {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(-8px, -2px);
+  }
+  100% {
+    transform: translate(6px, 1px);
+  }
+}
+
+@keyframes pixelDriftSmall {
+  0% {
+    transform: translate(0, 0);
+  }
+  50% {
+    transform: translate(7px, -3px);
+  }
+  100% {
+    transform: translate(-5px, 1px);
+  }
+}
+
+@keyframes pixelCompanionHover {
+  0%, 100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-5px);
+  }
+}
+
+@keyframes pixelShadowSquash {
+  0%, 100% {
+    transform: scaleX(1);
+    opacity: 0.45;
+  }
+  50% {
+    transform: scaleX(0.75);
+    opacity: 0.25;
+  }
+}
+
+@keyframes pixelTwinkle {
+  0%, 100% {
+    opacity: 0.25;
+    transform: scale(0.9);
+  }
+  50% {
+    opacity: 1;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes pixelFall {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(32px);
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes shootingStar {
+  0% {
+    transform: translateX(0) translateY(0) scale(0);
+    opacity: 0;
+  }
+  5% {
+    opacity: 1;
+    transform: translateX(-15px) translateY(10px) scale(1);
+  }
+  20% {
+    transform: translateX(-90px) translateY(55px) scale(0.8);
+    opacity: 1;
+  }
+  25% {
+    transform: translateX(-120px) translateY(75px) scale(0);
+    opacity: 0;
+  }
+  100% {
+    transform: translateX(-120px) translateY(75px) scale(0);
+    opacity: 0;
+  }
+}
+
+.animate-pixel-twinkle {
+  animation: pixelTwinkle ease-in-out infinite;
+}
+
+.animate-pixel-fall {
+  animation: pixelFall 1.2s cubic-bezier(0.25, 0.46, 0.45, 0.94) forwards;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.2s ease-out forwards;
 }
