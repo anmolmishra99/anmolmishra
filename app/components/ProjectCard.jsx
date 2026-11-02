@@ -15,6 +15,8 @@ export default function ProjectCard({
   tags = [],
   link,
   linkText = "Case study →",
+  links = [],
+  highlightPill,
   hasCompanion = false,
   soundEnabled = true,
   isCreative = false,
@@ -49,25 +51,43 @@ export default function ProjectCard({
 
       {/* Right Column: Project Details */}
       <div className="space-y-3">
-        {/* Title */}
+        {/* Title & Prominent Highlight Pill */}
         <div>
-          {link ? (
-            <a
-              href={link}
-              target={link.startsWith("http") ? "_blank" : undefined}
-              rel="noopener noreferrer"
-              className="group/title inline-flex items-center gap-1.5 text-base md:text-lg font-medium text-[#f1f3f9] hover:text-[#fe8500] transition-colors"
-            >
-              <span>{title}</span>
-              <span className="text-[#105bff] group-hover/title:translate-x-1 group-hover/title:-translate-y-0.5 group-hover/title:text-[#fe8500] transition-all text-sm font-bold">
-                →
+          <div className="flex flex-wrap items-center gap-2">
+            {link ? (
+              <a
+                href={link}
+                target={link.startsWith("http") ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                className="group/title inline-flex items-center gap-1.5 text-base md:text-lg font-medium text-[#f1f3f9] hover:text-[#fe8500] transition-colors"
+              >
+                <span>{title}</span>
+                <span className="text-[#105bff] group-hover/title:translate-x-1 group-hover/title:-translate-y-0.5 group-hover/title:text-[#fe8500] transition-all text-sm font-bold">
+                  →
+                </span>
+              </a>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-base md:text-lg font-medium text-[#f1f3f9]">
+                {title}
               </span>
-            </a>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 text-base md:text-lg font-medium text-[#f1f3f9]">
-              {title}
-            </span>
-          )}
+            )}
+
+            {/* Support both highlightPills array and single highlightPill */}
+            {(Array.isArray(highlightPill) ? highlightPill : highlightPill ? [highlightPill] : []).map((pill, idx) => (
+              <span
+                key={idx}
+                className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[11px] font-medium font-mono shadow-sm ${
+                  pill.variant === "orange"
+                    ? "bg-[#271a12] border border-[#693d1b] text-[#ffa347]"
+                    : "bg-[#131b31] border border-[#2d3d6b] text-[#8ea8f7]"
+                }`}
+              >
+                {pill.icon && <span>{pill.icon}</span>}
+                <span>{pill.text || pill}</span>
+              </span>
+            ))}
+          </div>
+
           {tagline && (
             <p className="text-xs text-zinc-400 font-mono mt-0.5">{tagline}</p>
           )}
@@ -106,13 +126,13 @@ export default function ProjectCard({
           </div>
         )}
 
-        {/* Tech Badges */}
+        {/* Tech Badges styled as Inline Tech Stack Badges */}
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5 pt-1">
             {tags.map((tag) => (
               <span
                 key={tag}
-                className="text-[10px] sm:text-[11px] font-mono px-2 py-0.5 rounded bg-[#1b1d26] border border-[#2e3242] text-zinc-300 hover:border-[#105bff] hover:text-white transition-colors"
+                className="inline-block px-2 py-0.5 rounded-lg bg-[#192138] border border-[#344470] text-white font-medium text-[11px] font-mono shadow-sm hover:border-[#105bff] hover:text-[#9bb7ff] transition-colors"
               >
                 {tag}
               </span>
@@ -121,19 +141,32 @@ export default function ProjectCard({
         )}
 
         {/* Link / CTA */}
-        {link && (
-          <div className="pt-1">
-            <a
-              href={link}
-              target={link.startsWith("http") ? "_blank" : undefined}
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-1 text-xs font-semibold text-[#105bff] hover:text-[#fe8500] transition-colors group/link"
-            >
-              <span>{linkText}</span>
-              <span className="group-hover/link:translate-x-0.5 transition-transform">
-                →
-              </span>
-            </a>
+        {(link || links.length > 0) && (
+          <div className="pt-1 flex flex-wrap items-center gap-3">
+            {links.length > 0 ? (
+              links.map((l, idx) => (
+                <a
+                  key={idx}
+                  href={l.url}
+                  target={l.url.startsWith("http") ? "_blank" : undefined}
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-xs font-semibold text-[#105bff] hover:text-[#fe8500] transition-colors group/link"
+                >
+                  <span>{l.text ? l.text.replace(/\s*→$/, "") : l.url}</span>
+                  <ArrowUpRight className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+                </a>
+              ))
+            ) : (
+              <a
+                href={link}
+                target={link.startsWith("http") ? "_blank" : undefined}
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1 text-xs font-semibold text-[#105bff] hover:text-[#fe8500] transition-colors group/link"
+              >
+                <span>{linkText ? linkText.replace(/\s*→$/, "") : "Visit link"}</span>
+                <ArrowUpRight className="w-3.5 h-3.5 group-hover/link:translate-x-0.5 group-hover/link:-translate-y-0.5 transition-transform" />
+              </a>
+            )}
           </div>
         )}
       </div>

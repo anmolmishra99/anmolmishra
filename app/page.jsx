@@ -6,13 +6,13 @@ import {
   Mail,
   Phone,
   FileDown,
-  Sparkles,
   Check,
   Copy,
   ExternalLink,
   MapPin,
   ArrowRight,
   Terminal,
+  Sparkles,
 } from "lucide-react";
 
 // Clean inline SVGs for brand icons
@@ -32,6 +32,50 @@ function LinkedinIcon({ className = "w-3.5 h-3.5" }) {
       <rect x="2" y="9" width="4" height="12" />
       <circle cx="4" cy="4" r="2" />
     </svg>
+  );
+}
+
+// Verified Checkmark Badge as in reference image
+function VerifiedBadge({ className = "w-5 h-5 text-[#3b72fe]" }) {
+  return (
+    <svg className={className} viewBox="0 0 24 24" fill="currentColor" aria-label="Verified">
+      <path d="M12 1L9.27 3.32L5.69 2.87L4.41 6.29L1.13 7.84L2.09 11.31L0.5 14.59L3.18 17.03L3.58 20.63L7.15 21.05L9.36 23.91L12 22.61L14.64 23.91L16.85 21.05L20.42 20.63L20.82 17.03L23.5 14.59L21.91 11.31L22.87 7.84L19.59 6.29L18.31 2.87L14.73 3.32L12 1Z" />
+      <path d="M9.5 16.2L5.8 12.5L7.2 11.1L9.5 13.4L16.8 6.1L18.2 7.5L9.5 16.2Z" fill="white" />
+    </svg>
+  );
+}
+
+// Highlighted Tech Badge as in reference image (supports default blue/indigo or warm amber/orange)
+function TechBadge({ children, color = "blue" }) {
+  if (color === "orange") {
+    return (
+      <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#281b12] border border-[#7a461b] text-[#ffa852] font-medium text-[11px] sm:text-xs font-mono mx-0.5 align-middle shadow-sm hover:border-[#fe8500] hover:text-white transition-colors">
+        {children}
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center px-2 py-0.5 rounded-md bg-[#1d233a] border border-[#3c4a75] text-[#f1f5f9] font-medium text-[11px] sm:text-xs font-mono mx-0.5 align-middle shadow-sm hover:border-[#60a5fa] hover:text-white transition-colors">
+      {children}
+    </span>
+  );
+}
+
+// Prominent Highlight Pill as in reference image
+function HighlightPill({ children, icon, variant = "blue" }) {
+  if (variant === "orange") {
+    return (
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#271a12] border border-[#693d1b] text-[#ffa347] text-xs sm:text-[13px] font-medium font-mono shadow-sm hover:border-[#fe8500] hover:text-white transition-colors">
+        {icon && <span className="shrink-0">{icon}</span>}
+        <span>{children}</span>
+      </span>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-[#131b31] border border-[#2d3d6b] text-[#8ea8f7] text-xs sm:text-[13px] font-medium font-mono shadow-sm hover:border-[#105bff] hover:text-white transition-colors">
+      {icon && <span className="shrink-0">{icon}</span>}
+      <span>{children}</span>
+    </span>
   );
 }
 
@@ -66,9 +110,14 @@ export default function Home() {
         <div className="absolute top-1/2 -left-32 w-80 h-80 bg-[#105bff]/15 rounded-full blur-3xl" />
       </div>
 
-      {/* Animated Pixel Sky (On mobile sits gracefully in top sky row; on desktop floats absolute top-right) */}
-      <div className="w-full flex justify-end pr-2 pt-2 sm:pt-0 sm:pr-0 sm:absolute sm:top-6 sm:right-6 md:right-12 lg:right-20 z-20 pointer-events-auto">
-        <div className="scale-75 sm:scale-90 md:scale-100 origin-top-right">
+      {/* 
+        [POSITION CONTROL - PIXEL CLOUD]:
+        - Change `top-2` (e.g. top-1, top-3) to nudge clouds up/down
+        - Change `right-2` to nudge clouds left/right
+        - Change `scale-[0.65]` to make clouds smaller/larger
+      */}
+      <div className="absolute top-2 right-2 sm:top-3 sm:right-6 md:right-10 z-20 pointer-events-auto">
+        <div className="scale-[0.65] sm:scale-75 md:scale-90 origin-top-right">
           <PixelSky
             isCreative={true}
             soundEnabled={soundEnabled}
@@ -91,147 +140,159 @@ export default function Home() {
         isCreative={true}
       />
 
-      <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-2 sm:pt-16 md:pt-20 pb-32 sm:pb-36">
+      {/* 
+        [POSITION CONTROL - NAME & HERO DISTANCE FROM TOP]:
+        - Change `pt-24` on mobile or `sm:pt-20 md:pt-24` on desktop to nudge the name up/down.
+        - Options to test:
+            `pt-16` (closer to top)
+            `pt-20` (medium gap)
+            `pt-24` (recommended: safely clears cloud on phone)
+            `pt-28` (extra spacious gap)
+      */}
+      <main className="max-w-2xl mx-auto px-4 sm:px-6 pt-24 sm:pt-20 md:pt-24 pb-32 sm:pb-36">
         {/* HERO / PROFILE HEADER */}
-        <div className="flex items-start gap-3 sm:gap-4 pb-5 sm:pb-6">
-          {/* Avatar */}
+        <div className="flex items-start gap-3 sm:gap-5 pb-4 sm:pb-5">
+          {/* Avatar with blue glowing border matching reference */}
           <div className="relative group shrink-0">
             <button
               onClick={() => {
                 if (soundEnabled) playPixelBlip(640, "sine", 0.04);
                 setPhotoOpen(true);
               }}
-              className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 rounded-2xl overflow-hidden border border-[#2e3242] bg-[#1b1d26] shadow-xl relative block text-left cursor-zoom-in transition-all group-hover:border-[#105bff]/60 group-hover:shadow-[0_0_15px_rgba(16,91,255,0.25)]"
+              className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 rounded-2xl overflow-hidden border-2 border-[#105bff]/60 bg-[#1b1d26] shadow-[0_0_24px_rgba(16,91,255,0.35)] relative block text-left cursor-zoom-in transition-all group-hover:scale-105 group-hover:border-[#105bff] group-hover:shadow-[0_0_30px_rgba(16,91,255,0.55)]"
               title="Click to view full photo"
             >
               <Image
                 src={anmolAvatar}
                 alt="Anmol Mishra"
                 priority
-                className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-300"
+                className="object-cover w-full h-full transition-transform duration-300"
                 style={{ objectPosition: "50% 38%" }}
               />
             </button>
           </div>
 
           {/* Name & Title */}
-          <div className="space-y-1 flex-1 min-w-0">
-            <h1 className="text-xl sm:text-2xl md:text-3xl font-semibold text-white tracking-tight break-words">
-              Anmol Mishra
-            </h1>
+          <div className="space-y-1 sm:space-y-1.5 flex-1 min-w-0">
+            <div className="flex items-center gap-2">
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white tracking-tight break-words">
+                Anmol Mishra
+              </h1>
+              <VerifiedBadge className="w-5 h-5 sm:w-6 sm:h-6 text-[#1d9bf0] shrink-0" />
+            </div>
+
             <p className="text-xs sm:text-sm md:text-base text-zinc-300 font-normal leading-snug">
               AI/ML Engineer · Full-Stack Developer · Technical Lead
             </p>
-            <div className="flex flex-wrap items-center gap-1.5 sm:gap-2 pt-0.5 text-[11px] sm:text-xs text-zinc-400 font-mono">
-              <span className="inline-flex items-center gap-1 text-zinc-400">
-                <MapPin className="w-3 h-3 text-[#fe8500] shrink-0" />
-                <span>Noida / Mau, India</span>
-              </span>
-              <span className="text-zinc-600 hidden sm:inline">•</span>
-              <span className="text-[#105bff] font-semibold">3+ Years Production AI</span>
-              <span className="text-zinc-600 hidden sm:inline">•</span>
-              <span className="text-[#fe8500] font-semibold">2 Acquired SaaS</span>
+
+            <div className="flex items-center gap-1.5 pt-0.5 text-xs sm:text-sm text-zinc-400 font-mono">
+              <span className="text-[#fe8500] text-sm">📍</span>
+              <span>Noida / Mau, India</span>
+            </div>
+
+            {/* Two highlight pills matching reference image */}
+            <div className="flex flex-wrap items-center gap-2 sm:gap-2.5 pt-2">
+              <HighlightPill variant="blue" icon={<Sparkles className="w-3.5 h-3.5 text-[#5e82ff] shrink-0" />}>
+                3+ Years Production AI
+              </HighlightPill>
+
+              <HighlightPill variant="orange" icon={<span className="text-xs sm:text-sm">🏆</span>}>
+                2 Acquired SaaS
+              </HighlightPill>
             </div>
           </div>
         </div>
 
-        {/* BIO & EDITORIAL MANIFESTO */}
-        <div className="space-y-3.5 sm:space-y-4 pt-3 sm:pt-4 text-[13px] sm:text-sm md:text-[15px] leading-relaxed text-zinc-300 font-normal border-b border-[#2e3242] pb-8 sm:pb-10">
-          <p className="text-white font-medium text-sm sm:text-base leading-relaxed">
+        {/* EDITORIAL MANIFESTO CALLOUT CARD MATCHING REFERENCE IMAGE */}
+        <div className="relative rounded-2xl bg-[#161a29]/90 border border-[#343b59] p-4 sm:p-5 shadow-lg flex items-start gap-3.5 sm:gap-4 my-4 sm:my-5">
+          <div className="w-1.5 self-stretch rounded-full bg-gradient-to-b from-[#4f67ff] to-[#105bff] shrink-0 min-h-[44px]" />
+          <p className="text-white font-semibold text-sm sm:text-base md:text-[16px] leading-snug sm:leading-relaxed">
             Real-world AI isn&apos;t demo-ware. It&apos;s high-uptime, fault-tolerant infrastructure delivering measurable human impact.
           </p>
+        </div>
 
-          <p>
-            I architect and ship production{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              RAG pipelines
-            </span>
-            , autonomous{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              LLM agents
-            </span>
-            , and high-performance full-stack web and mobile applications. I build robust backends in{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              Python (FastAPI, Flask)
-            </span>
-            , engineer reactive interfaces in{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              Next.js
-            </span>{" "}
-            and{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              Flutter
-            </span>
-            , orchestrate multi-agent crews with{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              LangChain
-            </span>{" "}
-            and{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              CrewAI
-            </span>
-            , and deploy semantic retrieval across{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              FAISS &amp; Pinecone
-            </span>{" "}
-            with{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              Voice AI (Whisper STT/TTS)
-            </span>
-            . The goal is simple: systems that eliminate human friction, feel fast, and operate at true scale.
+        {/* BIO & EDITORIAL HIGHLIGHTS */}
+        <div className="space-y-4 pt-1 text-[13px] sm:text-sm md:text-[15px] leading-relaxed text-zinc-300 font-normal border-b border-[#2e3242] pb-8 sm:pb-10">
+          <p className="leading-relaxed">
+            I architect and ship production <TechBadge>RAG pipelines</TechBadge>, autonomous{" "}
+            <TechBadge>LLM agents</TechBadge>, and high-performance full-stack web and mobile applications.
+            I build robust backends in <TechBadge>Python (FastAPI, Flask)</TechBadge>, engineer reactive
+            interfaces in <TechBadge>Next.js</TechBadge> and <TechBadge>Flutter</TechBadge>, orchestrate
+            multi-agent crews with <TechBadge>LangChain</TechBadge> and <TechBadge>CrewAI</TechBadge>,
+            and deploy semantic retrieval across <TechBadge>Pinecone</TechBadge> with{" "}
+            <TechBadge>Voice AI (Whisper STT/TTS)</TechBadge>. The goal is simple: systems that eliminate human
+            friction, feel fast, and operate at true scale.
           </p>
 
-          <p>
+          <p className="leading-relaxed">
             These days I do that as AI/ML Engineer &amp; Technical Lead at{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              Arixolve Ventures
-            </span>
-            . Over the past 3+ years, I&apos;ve shipped municipal citizen AI for{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              Chh. Sambhaji Nagar Smart City
-            </span>{" "}
-            (serving 21,596 citizen conversations and 58,706 messages), delivered blockchain land-acquisition
-            intelligence for the{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              Palghar Collector Office
-            </span>{" "}
-            tracking ₹7,531 Cr compensation across 16,375 records and 221 villages, and built{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              Sanvichar
-            </span>
-            , a real-time bilingual board meeting platform for Maharashtra state boards.
+            <TechBadge>Arixolve Ventures</TechBadge>. Over the past 3+ years, I&apos;ve shipped municipal citizen AI for{" "}
+            <TechBadge>Chh. Sambhaji Nagar Smart City</TechBadge> (serving <TechBadge color="orange">21,596 citizen conversations</TechBadge> and <TechBadge color="orange">58,706 messages</TechBadge>), delivered blockchain land-acquisition
+            intelligence with{" "}
+            <a
+              href="https://esulabh.in"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center hover:opacity-90 transition-opacity"
+            >
+              <TechBadge color="orange">eSulabh (esulabh.in)</TechBadge>
+            </a>{" "}
+            for the <TechBadge>Palghar Collector Office</TechBadge> tracking <TechBadge color="orange">₹7,531 Cr compensation</TechBadge> across <TechBadge color="orange">16,375 records</TechBadge> and <TechBadge color="orange">221 villages</TechBadge>, and built{" "}
+            <a
+              href="https://www.sanvichar.online/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center hover:opacity-90 transition-opacity"
+            >
+              <TechBadge color="orange">Sanvichar (sanvichar.online)</TechBadge>
+            </a>
+            , a real-time bilingual board meeting platform for Maharashtra state boards running <TechBadge color="orange">3 live government meetings</TechBadge>.
           </p>
 
-          <p>
+          <p className="leading-relaxed">
             Two self-built SaaS products bootstrapped and acquired in 2024:{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              toasty.ai
-            </span>{" "}
-            (acquired by Lumination.ai, USA) and{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              launchpage.me
-            </span>{" "}
-            (acquired by a Canadian entrepreneur). Currently co-founding and building{" "}
+            <a
+              href="https://toasty.ai/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center hover:opacity-90 transition-opacity"
+            >
+              <TechBadge color="orange">toasty.ai (acquired)</TechBadge>
+            </a>{" "}
+            by <TechBadge>Lumination.ai (USA)</TechBadge> (<TechBadge color="orange">10+ GBs multimedia</TechBadge> &amp; <TechBadge>Web Components</TechBadge>) and{" "}
+            <a
+              href="https://launchpage.me/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center hover:opacity-90 transition-opacity"
+            >
+              <TechBadge color="orange">launchpage.me (acquired)</TechBadge>
+            </a>{" "}
+            by a <TechBadge>Canadian entrepreneur</TechBadge>. Currently co-founding and building{" "}
             <a
               href="https://payge.store"
               target="_blank"
               rel="noopener noreferrer"
-              className="border-b border-dotted border-[#fe8500] text-[#fe8500] font-medium hover:text-white transition-colors"
+              className="inline-flex items-center hover:opacity-90 transition-opacity"
             >
-              Payge
-            </a>{" "}
-            (payge.store), an Indian Shopify for social sellers with automated Razorpay Route
-            split payouts (95% to seller, 5% to Payge) and an AI growth engine.
+              <TechBadge color="orange">Payge (payge.store)</TechBadge>
+            </a>
+            , an Indian Shopify for social sellers with automated <TechBadge color="orange">Razorpay Route</TechBadge> split payouts (<TechBadge color="orange">95% to seller, 5% to Payge</TechBadge>) and an <TechBadge>AI growth engine</TechBadge>. Also built{" "}
+            <a
+              href="https://www.vela.video/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center hover:opacity-90 transition-opacity"
+            >
+              <TechBadge color="orange">vela.video</TechBadge>
+            </a>
+            , an AI motion graphics video engine powered by <TechBadge>Remotion</TechBadge> &amp; <TechBadge>Gemini API</TechBadge> (<TechBadge color="orange">3.3K unique visitors</TechBadge>, <TechBadge>client-side on-device export</TechBadge>).
           </p>
 
-          <p>
-            I&apos;m self-taught with a B.Tech in Computer Science &amp; Engineering (AKTU). I work directly
-            with government officials, district collectors, and founders to translate messy, manual workflows
-            into bulletproof automated systems, usually with{" "}
-            <span className="border-b border-dotted border-zinc-500 text-white font-medium hover:border-[#fe8500] hover:text-[#fe8500] transition-colors cursor-default">
-              lo-fi beats
-            </span>{" "}
-            in my ears.
+          <p className="leading-relaxed">
+            I&apos;m self-taught with a <TechBadge>B.Tech in Computer Science &amp; Engineering (AKTU)</TechBadge>. I work directly
+            with government officials, <TechBadge>District Collectors</TechBadge>, and founders to translate messy, manual workflows
+            into bulletproof automated systems, usually with <TechBadge>lo-fi beats</TechBadge> in my ears.
           </p>
 
           {/* Quick Connect & Action Pills */}
@@ -284,18 +345,19 @@ export default function Home() {
               <GithubIcon className="w-3.5 h-3.5 text-[#105bff] shrink-0" />
               <span>GitHub</span>
             </a>
-
-
           </div>
         </div>
 
         {/* SELECTED WORK SECTION */}
         <section className="pt-8">
           <div className="flex items-center justify-between pb-4">
-            <h2 className="text-xs font-mono tracking-widest text-[#fe8500] uppercase font-semibold">
-              Selected Work
-            </h2>
-            <span className="text-[11px] font-mono text-[#105bff] font-medium">
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-xs font-mono tracking-widest text-[#fe8500] uppercase font-semibold">
+                Selected Work
+              </h2>
+              <HighlightPill variant="blue" icon="✦">7 Production Systems</HighlightPill>
+            </div>
+            <span className="text-[11px] font-mono text-[#105bff] font-medium hidden sm:inline">
               Interactive Mode ✨
             </span>
           </div>
@@ -307,15 +369,23 @@ export default function Home() {
               metricSub="live stores"
               title="Payge"
               tagline="Indian Shopify for Social Sellers · Co-founder & CTO"
-              description="Where a seller launches their single-product online store with checkout, orders, and analytics in one place. Handled 30K+ tracked events, 14K page views, and 2K unique visitors. Engineered Razorpay Route with partner OAuth onboarding so every sale splits automatically: 95% straight to the seller's bank account and 5% to Payge with zero manual payouts."
+              highlightPill={[
+                { text: "Razorpay Route 95/5 Split", variant: "orange", icon: "⚡" },
+                { text: "100+ Live Stores", variant: "blue", icon: "✦" },
+              ]}
+              description={
+                <>
+                  Where a creator launches a single-product online store with instant checkout, orders, and analytics. Scaled to <TechBadge color="orange">30K+ tracked events</TechBadge>, <TechBadge color="orange">14K page views</TechBadge>, and <TechBadge color="orange">2K unique visitors</TechBadge>. Engineered <TechBadge color="orange">Razorpay Route</TechBadge> with partner OAuth onboarding so every transaction splits automatically: <TechBadge color="orange">95% straight to seller bank account</TechBadge> and <TechBadge color="orange">5% to Payge</TechBadge> with <TechBadge>zero manual payouts</TechBadge>.
+                </>
+              }
               bullets={[
-                "Automated 95/5 split payouts with Razorpay Route OAuth partner onboarding, zero subscription fee.",
-                "Built Growth OS: connects seller and competitors' Instagram accounts, analyses top-performing reels from past 7 days, and AI generates high-converting hooks.",
-                "High-performance Next.js store architecture with sub-second checkout conversion.",
+                <>Automated <TechBadge color="orange">95/5 split payouts</TechBadge> via <TechBadge>Razorpay Route OAuth</TechBadge> partner onboarding, eliminating manual disbursement with zero monthly subscription fee.</>,
+                <>Built <TechBadge>Growth OS</TechBadge>: connects seller and competitor <TechBadge>Instagram Graph APIs</TechBadge>, analyzes top-performing reels over 7 days, and <TechBadge>AI generates high-converting scripts</TechBadge>.</>,
+                <>High-performance <TechBadge>Next.js 16 App Router</TechBadge> storefront architecture achieving <TechBadge color="orange">sub-second checkout</TechBadge> conversion.</>,
               ]}
               tags={["Next.js", "Firebase", "Tailwind CSS", "Razorpay Route", "Instagram API", "LLM Agents"]}
               link="https://payge.store"
-              linkText="payge.store →"
+              linkText="payge.store"
               hasCompanion={false}
               soundEnabled={soundEnabled}
               isCreative={true}
@@ -327,15 +397,23 @@ export default function Home() {
               metricSub="conversations"
               title="AI Mitra"
               tagline="Citizen AI Chatbot · Chh. Sambhaji Nagar Municipal Corp & Smart City"
-              description="Built a production RAG chatbot grounded on official municipal documents (chunking, embeddings, semantic retrieval). In production it has handled 21,596 conversations and 58,706 messages (averaging 2.7 messages per conversation, answering in ~3 turns). Saved citizens an estimated 16,197 hours and delivered 8,806 direct official links straight into chat."
-              bullets={[
-                "Saved 971,820 citizen minutes. Top intents: Development Plan (DP), property tax, occupancy and marriage certificates.",
-                "Ultra-high precision: only 0.5% of queries (100) were flagged as complex needing human follow-up.",
-                "Bilingual vernacular engine: English (92%) and Marathi (8%) with voice STT/TTS for non-technical citizens.",
-                "CrewAI reporting crew (data analyst, trend detection, report writer) summarizing query clusters directly for municipal leadership.",
+              highlightPill={[
+                { text: "Smart City Govt AI · 21.6K Chats", variant: "blue", icon: "✦" },
+                { text: "0.5% Human Escalation", variant: "orange", icon: "⚡" },
               ]}
-              tags={["Python", "LangChain", "CrewAI", "FAISS / Pinecone", "FastAPI", "Next.js", "Voice AI"]}
-              linkText="View Deployment Architecture →"
+              description={
+                <>
+                  Built a production <TechBadge>RAG chatbot</TechBadge> grounded on official municipal documents (<TechBadge>chunking</TechBadge>, <TechBadge>embeddings</TechBadge>, <TechBadge>semantic search</TechBadge> via <TechBadge>Pinecone</TechBadge>). In production it resolved <TechBadge color="orange">21,596 citizen conversations</TechBadge> and <TechBadge color="orange">58,706 messages</TechBadge> (averaging <TechBadge>2.7 msgs/conversation</TechBadge>, answering queries in ~3 turns). Saved citizens an estimated <TechBadge color="orange">16,197 hours</TechBadge> and delivered <TechBadge color="orange">8,806 official links</TechBadge> directly into chat.
+                </>
+              }
+              bullets={[
+                <>Saved <TechBadge color="orange">971,820 citizen minutes</TechBadge>. Top intents: <TechBadge>Development Plan (DP)</TechBadge>, <TechBadge>property tax</TechBadge>, occupancy, and marriage certificates.</>,
+                <>Ultra-high precision grounding: only <TechBadge color="orange">0.5% of queries (100)</TechBadge> required escalation for human follow-up.</>,
+                <>Vernacular engine: <TechBadge>English (92%)</TechBadge> and <TechBadge>Marathi (8%)</TechBadge> with <TechBadge>Voice AI (Whisper STT/TTS)</TechBadge> for non-technical citizens.</>,
+                <>Autonomous <TechBadge>CrewAI multi-agent reporting crew</TechBadge> (data analyst, trend detection, report writer) summarizing query clusters directly for municipal leadership.</>,
+              ]}
+              tags={["Python", "LangChain", "CrewAI", "Pinecone", "FastAPI", "Next.js", "Voice AI"]}
+              linkText="View Deployment Architecture"
               soundEnabled={soundEnabled}
               isCreative={true}
             />
@@ -346,67 +424,132 @@ export default function Home() {
               metricSub="compensation"
               title="eSulabh"
               tagline="Blockchain Land Acquisition System + AI Layer · Palghar Collector Office"
-              description="Built the AI and analytics layer of a land-acquisition tracking system for 10+ mega infrastructure projects (expressways, rail, freight corridors) covering 16,375 land records and 221 villages. Tracks ₹7,531 Cr total compensation across 3,313 Ha of land. Contributed to on-chain smart contracts with tamper-proof ownership transfers and multi-party approvals."
+              highlightPill={[
+                { text: "Palghar Collector Office · ₹7,531 Cr", variant: "blue", icon: "✦" },
+                { text: "16.3K Land Records", variant: "orange", icon: "⚡" },
+              ]}
+              description={
+                <>
+                  Built the AI and analytics layer of a land-acquisition tracking platform for <TechBadge color="orange">10+ mega infrastructure projects</TechBadge> (bullet train, expressways, freight corridors) covering <TechBadge color="orange">16,375 land records</TechBadge> and <TechBadge color="orange">221 villages</TechBadge>. Tracks <TechBadge color="orange">₹7,531 Cr total compensation</TechBadge> across <TechBadge>3,313 Ha of land</TechBadge>. Contributed to <TechBadge>on-chain smart contracts</TechBadge> with tamper-proof ownership transfers and multi-party approvals.
+                </>
+              }
               bullets={[
-                "Role-scoped RAG: access enforced directly in retrieval queries so officers only retrieve their division's records.",
-                "Public citizen lookup: landowners track compensation status with mobile + Gat number after official clearance.",
-                "6 one-click executive intelligence reports for the Collector: Briefing, Bottlenecks, Financials, Timelines, Pending Cases, Structure Reports.",
+                <><TechBadge>Role-scoped RAG</TechBadge>: multi-tenant security boundaries enforced directly inside vector retrieval queries so officers only retrieve their authorized division records.</>,
+                <>Public citizen lookup: landowners track land acquisition and disbursement status via <TechBadge>mobile + Gat number</TechBadge> after district clearance.</>,
+                <><TechBadge color="orange">6 one-click executive intelligence reports</TechBadge> for the District Collector: Briefing, Bottlenecks, Financials, Timelines, Pending Cases, and Structure Reports.</>,
               ]}
               tags={["Blockchain", "Smart Contracts", "Python", "LangChain", "RAG", "Next.js", "Firebase"]}
-              linkText="Govt Case Study →"
+              link="https://esulabh.in"
+              linkText="esulabh.in"
               soundEnabled={soundEnabled}
               isCreative={true}
             />
 
-            {/* 4. Two Acquired Products */}
+            {/* 4. toasty.ai (Acquired) */}
             <ProjectCard
-              metric="2 SaaS"
-              metricSub="acquired (2024)"
-              title="toasty.ai & launchpage.me"
-              tagline="Bootstrapped Micro-SaaS Exits"
-              description="Two self-built SaaS products engineered, scaled, and acquired in 2024. toasty.ai: multi-tenant SaaS for testimonial collection with custom embed widgets and automated collection sequences, acquired by Lumination.ai (USA). launchpage.me: no-code conversion-focused startup validation and waitlist builder, acquired by a Canadian entrepreneur."
-              bullets={[
-                "toasty.ai: reached paying customers before sale; acquired by Lumination.ai in 2024.",
-                "launchpage.me: acquired for simplicity and high-conversion validation workflow.",
-                "Built with Next.js, Firebase multi-tenant architecture, and clean design systems.",
+              metric="Acquired"
+              metricSub="USA Exit (2024)"
+              title="toasty.ai"
+              tagline="Testimonial & Review Collection SaaS · Acquired by Lumination.ai (USA)"
+              highlightPill={[
+                { text: "Acquired by Lumination.ai (USA)", variant: "orange", icon: "🏆" },
+                { text: "10+ GBs Multimedia", variant: "blue", icon: "✦" },
               ]}
-              tags={["Next.js", "Firebase", "Multi-tenant", "Tailwind CSS", "Micro-SaaS"]}
-              linkText="Read Acquisition Notes →"
+              description={
+                <>
+                  Multi-tenant SaaS platform engineered for automated testimonial and social proof capture. Handled and stored <TechBadge color="orange">10+ GBs of multimedia testimonials</TechBadge> (video, audio, text) and rendered them seamlessly on client websites using <TechBadge>custom Web Components</TechBadge> (lightweight <TechBadge>&lt;custom-tag&gt;</TechBadge>). Engineered embeddable widgets, wall-of-love displays, automated review collection sequences, and multi-tenant subdomains. Bootstrapped to paying MRR and acquired by <TechBadge>Lumination.ai (USA)</TechBadge> in 2024.
+                </>
+              }
+              bullets={[
+                <>Managed and stored <TechBadge color="orange">10+ GBs of multimedia testimonials</TechBadge> (video, audio, and rich text) with high-efficiency CDN streaming and multi-region storage.</>,
+                <>Zero-dependency <TechBadge>custom Web Components</TechBadge> (<TechBadge>&lt;toasty-widget&gt;</TechBadge>) enabling one-line client site embeds with sub-50ms render time.</>,
+                <>Multi-tenant infrastructure with <TechBadge>Next.js</TechBadge>, <TechBadge>Firebase Firestore</TechBadge>, and automated review request email campaigns.</>,
+                <>Bootstrapped from conception to paying customer MRR; acquired by <TechBadge>Lumination.ai (USA)</TechBadge> in 2024.</>,
+              ]}
+              tags={["Next.js", "Web Components", "Firebase", "Video / Multimedia", "Micro-SaaS", "Acquired"]}
+              link="https://toasty.ai/"
+              linkText="toasty.ai (acquired)"
               soundEnabled={soundEnabled}
               isCreative={true}
             />
 
-            {/* 5. Sanvichar */}
+            {/* 5. launchpage.me (Acquired) */}
+            <ProjectCard
+              metric="Acquired"
+              metricSub="Micro-SaaS Exit"
+              title="launchpage.me"
+              tagline="No-Code Startup Waitlist Builder · Acquired by Canadian Entrepreneur"
+              highlightPill={[
+                { text: "Acquired by Canadian Entrepreneur", variant: "orange", icon: "🏆" },
+                { text: "<60s Waitlist Builder", variant: "blue", icon: "✦" },
+              ]}
+              description={
+                <>
+                  Conversion-focused no-code waitlist builder and startup idea validator. Enabled early-stage founders to launch high-converting landing pages with <TechBadge color="orange">viral milestone referral mechanisms</TechBadge> and automated email capture in <TechBadge color="orange">under 60 seconds</TechBadge>. Bootstrapped and acquired by a <TechBadge>Canadian entrepreneur</TechBadge> in 2024.
+                </>
+              }
+              bullets={[
+                <>Built a <TechBadge>viral milestone referral engine</TechBadge> (e.g. invite 3 friends for VIP early access) driving exponential organic user acquisition.</>,
+                <><TechBadge>Zero-config analytics</TechBadge>, webhook delivery, and double opt-in email verification pipelines.</>,
+                <>Bootstrapped to hundreds of early founder waitlists; acquired by a Canadian entrepreneur in 2024.</>,
+              ]}
+              tags={["Next.js", "Firebase", "Tailwind CSS", "Viral Growth", "Acquired"]}
+              link="https://launchpage.me/"
+              linkText="launchpage.me (acquired)"
+              soundEnabled={soundEnabled}
+              isCreative={true}
+            />
+
+            {/* 6. Sanvichar */}
             <ProjectCard
               metric="3 Live"
               metricSub="board meetings"
               title="Sanvichar"
               tagline="AI Board Meeting Platform · Shivshahi Punarvasan Prakalp Ltd (Govt Board)"
-              description="Hosted 3 live government board meetings transcribed and structured in real time. Built Whisper-based speech transcription with automated extraction of agenda items, decisions, action points, and recorded votes. Generates bilingual (English + Marathi) summaries and official resolution text with a diff-aware notes editor."
+              highlightPill={[
+                { text: "3 Live Govt Board Meetings", variant: "blue", icon: "✦" },
+                { text: "Bilingual NLP (EN+MR)", variant: "orange", icon: "⚡" },
+              ]}
+              description={
+                <>
+                  Hosted <TechBadge color="orange">3 live government board meetings</TechBadge> transcribed and structured in real time for <TechBadge>Shivshahi Punarvasan Prakalp Ltd</TechBadge>. Engineered <TechBadge>Whisper-based speech transcription</TechBadge> with automated extraction of agenda items, decisions, action points, and recorded votes. Generates <TechBadge>bilingual (English + Marathi)</TechBadge> summaries and official resolution text with a diff-aware notes editor.
+                </>
+              }
               bullets={[
-                "Real-time Whisper transcription with structured agenda extraction and voting tracker.",
-                "Diff-aware versioning notes editor ensuring the secretariat reviews and approves summaries before finalization.",
-                "Direct resolution-certificate generator issuing legally-formatted certificates from recorded votes.",
+                <>Real-time <TechBadge>Whisper speech transcription</TechBadge> with structured agenda item extraction and voting tally records.</>,
+                <><TechBadge>Diff-aware versioning notes editor</TechBadge> enabling the secretariat to review, audit, and approve summaries prior to official gazette publication.</>,
+                <>Direct <TechBadge>resolution-certificate generator</TechBadge> producing legally compliant PDF certificates with digital signatures.</>,
               ]}
               tags={["Python", "Whisper STT", "LLM", "Next.js", "Firebase", "Bilingual NLP"]}
-              linkText="Platform Architecture →"
+              link="https://www.sanvichar.online/"
+              linkText="sanvichar.online"
               soundEnabled={soundEnabled}
               isCreative={true}
             />
 
-            {/* 6. visionari.me */}
+            {/* 7. vela.video */}
             <ProjectCard
-              metric="Multi-Agent"
-              metricSub="CrewAI system"
-              title="visionari.me"
-              tagline="AI Feedback & Market Intelligence · Active 2024 – Present"
-              description="Built an autonomous multi-agent market intelligence platform. A research agent scrapes and analyses web data, a market analyst agent scores demand signals, and a report writer agent compiles prioritized feature lists with revenue-change estimates per item."
-              bullets={[
-                "Autonomous web scraping and qualitative market sentiment extraction.",
-                "CrewAI agent orchestration with role-based division of labour and report compilation.",
+              metric="3.3K"
+              metricSub="unique visitors"
+              title="vela.video"
+              tagline="AI Motion Graphics & Video Generation Platform · Creator & Developer"
+              highlightPill={[
+                { text: "3.3K Visitors · Gemini + Remotion", variant: "blue", icon: "✦" },
+                { text: "Client-Side Export", variant: "orange", icon: "⚡" },
               ]}
-              tags={["Python", "CrewAI", "LangChain", "Multi-Agent", "Web Search", "Next.js"]}
-              linkText="Agent System Overview →"
+              description={
+                <>
+                  Built <a href="https://www.vela.video/" target="_blank" rel="noopener noreferrer" className="inline-flex items-center hover:opacity-90 transition-opacity"><TechBadge color="orange">vela.video</TechBadge></a>, an autonomous motion graphics video engine powered by <TechBadge>Remotion</TechBadge> composition skills and the <TechBadge>Google Gemini API</TechBadge>. Handled <TechBadge color="orange">3.3K unique visitors</TechBadge>, <TechBadge color="orange">4.7K page views</TechBadge>, and over <TechBadge color="orange">3.6K sessions</TechBadge> with organic discovery (<TechBadge color="orange">1.2K from Google</TechBadge>, <TechBadge color="orange">558 from ChatGPT</TechBadge>, <TechBadge color="orange">1.7K direct</TechBadge>). Generates programmatic motion graphic videos with complete <TechBadge>client-side on-device export</TechBadge> for zero server rendering costs.
+                </>
+              }
+              bullets={[
+                <>Programmatic motion graphics pipeline combining <TechBadge>Remotion</TechBadge> compositions with <TechBadge>Gemini API</TechBadge> for instant script-to-visual video generation.</>,
+                <><TechBadge>Client-side on-device export engine</TechBadge> delivering instant video previews and complete rendering directly in the browser via <TechBadge>WebCodecs</TechBadge>.</>,
+                <>Organic distribution engine: scaled to <TechBadge color="orange">3.3K unique visitors</TechBadge> and <TechBadge color="orange">4.7K page views</TechBadge> (<TechBadge color="orange">1.2K Google organic</TechBadge>, <TechBadge color="orange">558 ChatGPT organic</TechBadge>, 80 Bing, ProductHunt).</>,
+              ]}
+              tags={["Remotion", "Gemini API", "Next.js", "Motion Graphics", "On-Device Export", "WebCodecs"]}
+              link="https://www.vela.video/"
+              linkText="vela.video"
               soundEnabled={soundEnabled}
               isCreative={true}
             />
@@ -419,57 +562,101 @@ export default function Home() {
             <h2 className="text-xs font-mono tracking-widest text-[#fe8500] uppercase font-semibold">
               Technical Stack &amp; Skills
             </h2>
-            <span className="text-[11px] font-mono text-[#105bff] font-medium">Core Capabilities</span>
+            <HighlightPill variant="blue" icon="⚡">Core Capabilities</HighlightPill>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 text-sm">
             {/* AI / ML */}
-            <div className="p-4 rounded-xl bg-[#1b1d26] border border-[#2e3242] hover:border-[#105bff]/60 transition-colors">
-              <div className="text-xs font-mono text-[#fe8500] font-semibold mb-2 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#fe8500] shadow-[0_0_6px_#fe8500]" />
-                AI &amp; Multi-Agent Systems
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#1b1d26] border border-[#2e3242] hover:border-[#105bff]/60 transition-colors space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-mono text-[#fe8500] font-semibold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#fe8500] shadow-[0_0_6px_#fe8500]" />
+                  AI &amp; Multi-Agent Systems
+                </div>
+                <HighlightPill variant="blue">Production Grade</HighlightPill>
               </div>
-              <p className="text-xs text-zinc-300 leading-relaxed">
-                RAG Pipeline Design, LangChain (Agents, Tools, Memory), CrewAI Multi-Agent
-                Orchestration, Vector DBs (FAISS, Pinecone), Prompt Engineering, Voice AI (Whisper,
-                STT/TTS), AI Agent Automation.
+              <p className="text-xs text-zinc-400">
+                Battle-tested RAG, autonomous agents, and voice pipelines serving millions of message interactions.
               </p>
+              <div className="flex flex-wrap gap-1.5">
+                <TechBadge>RAG Pipeline Design</TechBadge>
+                <TechBadge>LangChain Agents</TechBadge>
+                <TechBadge>CrewAI Multi-Agent</TechBadge>
+                <TechBadge>Pinecone Vector DB</TechBadge>
+                <TechBadge>Whisper STT/TTS</TechBadge>
+                <TechBadge>Prompt Engineering</TechBadge>
+                <TechBadge>Autonomous Agent Crews</TechBadge>
+                <TechBadge>Semantic Chunking</TechBadge>
+              </div>
             </div>
 
             {/* Frontend */}
-            <div className="p-4 rounded-xl bg-[#1b1d26] border border-[#2e3242] hover:border-[#105bff]/60 transition-colors">
-              <div className="text-xs font-mono text-[#105bff] font-semibold mb-2 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#105bff] shadow-[0_0_6px_#105bff]" />
-                Frontend Architecture
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#1b1d26] border border-[#2e3242] hover:border-[#105bff]/60 transition-colors space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-mono text-[#105bff] font-semibold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#105bff] shadow-[0_0_6px_#105bff]" />
+                  Frontend Architecture
+                </div>
+                <HighlightPill variant="blue">Reactive &amp; Fast</HighlightPill>
               </div>
-              <p className="text-xs text-zinc-300 leading-relaxed">
-                Next.js (App Router, Server Actions, SSR), React 19, Tailwind CSS, Flutter (iOS &amp;
-                Android), Responsive Design Systems, Performance Optimization.
+              <p className="text-xs text-zinc-400">
+                High-conversion, sub-second web applications and cross-platform native mobile interfaces.
               </p>
+              <div className="flex flex-wrap gap-1.5">
+                <TechBadge>Next.js 16 (App Router)</TechBadge>
+                <TechBadge>React 19</TechBadge>
+                <TechBadge>Tailwind CSS</TechBadge>
+                <TechBadge>Flutter (iOS &amp; Android)</TechBadge>
+                <TechBadge>Remotion Motion Graphics</TechBadge>
+                <TechBadge>Web Components</TechBadge>
+                <TechBadge>Responsive UI Systems</TechBadge>
+                <TechBadge>WebCodecs</TechBadge>
+              </div>
             </div>
 
             {/* Backend & Cloud */}
-            <div className="p-4 rounded-xl bg-[#1b1d26] border border-[#2e3242] hover:border-[#105bff]/60 transition-colors">
-              <div className="text-xs font-mono text-[#fe8500] font-semibold mb-2 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#fe8500] shadow-[0_0_6px_#fe8500]" />
-                Backend &amp; Cloud Infrastructure
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#1b1d26] border border-[#2e3242] hover:border-[#105bff]/60 transition-colors space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-mono text-[#fe8500] font-semibold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#fe8500] shadow-[0_0_6px_#fe8500]" />
+                  Backend &amp; Cloud Infrastructure
+                </div>
+                <HighlightPill variant="orange">High Uptime</HighlightPill>
               </div>
-              <p className="text-xs text-zinc-300 leading-relaxed">
-                Python (FastAPI, Flask), Firebase (Firestore, Auth, Cloud Functions), REST APIs,
-                Razorpay Route Split Payouts, Smart Contracts &amp; Blockchain Integration.
+              <p className="text-xs text-zinc-400">
+                Scalable APIs, automated payment routing, event streaming, and tamper-proof smart contracts.
               </p>
+              <div className="flex flex-wrap gap-1.5">
+                <TechBadge>Python (FastAPI, Flask)</TechBadge>
+                <TechBadge>Firebase (Firestore, Functions)</TechBadge>
+                <TechBadge>REST APIs</TechBadge>
+                <TechBadge color="orange">Razorpay Route Split Payouts</TechBadge>
+                <TechBadge>Smart Contracts &amp; Blockchain</TechBadge>
+                <TechBadge>Redis Caching</TechBadge>
+                <TechBadge>Vector Search Indexing</TechBadge>
+              </div>
             </div>
 
             {/* Engineering & Delivery */}
-            <div className="p-4 rounded-xl bg-[#1b1d26] border border-[#2e3242] hover:border-[#105bff]/60 transition-colors">
-              <div className="text-xs font-mono text-[#105bff] font-semibold mb-2 flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-[#105bff] shadow-[0_0_6px_#105bff]" />
-                Engineering &amp; Technical Leadership
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#1b1d26] border border-[#2e3242] hover:border-[#105bff]/60 transition-colors space-y-3">
+              <div className="flex items-center justify-between">
+                <div className="text-xs font-mono text-[#105bff] font-semibold flex items-center gap-1.5">
+                  <span className="w-1.5 h-1.5 rounded-full bg-[#105bff] shadow-[0_0_6px_#105bff]" />
+                  Engineering Leadership
+                </div>
+                <HighlightPill variant="blue">Execution</HighlightPill>
               </div>
-              <p className="text-xs text-zinc-300 leading-relaxed">
-                System Design, Technical Team Leadership, Govt Tech Client Discovery (District
-                Collectors &amp; Municipal Officers), Agile Sprint Delivery, Code Review &amp; Mentoring.
+              <p className="text-xs text-zinc-400">
+                Direct discovery with government leadership, sprint velocity, and end-to-end product delivery.
               </p>
+              <div className="flex flex-wrap gap-1.5">
+                <TechBadge>System Design</TechBadge>
+                <TechBadge>Technical Architecture</TechBadge>
+                <TechBadge>District Collector Client Discovery</TechBadge>
+                <TechBadge>Agile Sprint Delivery</TechBadge>
+                <TechBadge>Code Review &amp; Mentoring</TechBadge>
+                <TechBadge>Production Observability</TechBadge>
+              </div>
             </div>
           </div>
         </section>
@@ -480,26 +667,49 @@ export default function Home() {
             <h2 className="text-xs font-mono tracking-widest text-[#fe8500] uppercase font-semibold">
               Experience
             </h2>
-            <span className="text-[11px] font-mono text-[#105bff] font-medium">2022 – Present</span>
+            <HighlightPill variant="blue" icon="✦">2022 – Present · 3+ Years</HighlightPill>
           </div>
 
           <div className="space-y-4">
-            <div className="p-4 rounded-xl bg-[#1b1d26] border border-[#2e3242]">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1 pb-2">
+            <div className="p-4 sm:p-5 rounded-2xl bg-[#1b1d26] border border-[#2e3242] space-y-3">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-1">
                 <div>
-                  <h3 className="text-sm font-semibold text-white">
+                  <h3 className="text-base font-semibold text-white">
                     AI/ML Engineer &amp; Technical Lead
                   </h3>
-                  <p className="text-xs text-[#105bff] font-medium">Arixolve Ventures Pvt Ltd · Noida, India</p>
+                  <p className="text-xs text-[#105bff] font-medium pt-0.5">
+                    Arixolve Ventures Pvt Ltd · Noida, India
+                  </p>
                 </div>
-                <span className="text-xs font-mono text-[#fe8500]">2022 – Present</span>
+                <div className="flex flex-wrap items-center gap-2">
+                  <HighlightPill variant="orange" icon="⚡">Technical Lead</HighlightPill>
+                  <HighlightPill variant="blue" icon="✦">Full-Time</HighlightPill>
+                </div>
               </div>
               <p className="text-xs text-zinc-300 leading-relaxed">
-                Lead architecture and delivery across the company&apos;s product and government project
-                portfolio. Direct client discovery sessions with District Collectors and Smart City
-                programme officers to formulate technical specs, multi-agent pipelines, and
-                high-availability production systems.
+                Lead architecture and delivery across the company&apos;s product and government project portfolio. Direct client discovery sessions with <TechBadge>District Collectors</TechBadge> and <TechBadge>Smart City programme officers</TechBadge> to formulate technical specs, <TechBadge>multi-agent pipelines</TechBadge>, and <TechBadge color="orange">high-availability production systems</TechBadge>. Oversee full-stack engineers across web, mobile, and AI infrastructure.
               </p>
+              <ul className="space-y-1.5 border-l border-[#2e3242] pl-3.5 text-xs text-zinc-300 pt-1">
+                <li>
+                  <span className="text-[#fe8500] mr-1.5 font-bold">▪</span>
+                  Architected <TechBadge>municipal citizen AI</TechBadge> for <TechBadge>Chh. Sambhaji Nagar Smart City</TechBadge> (<TechBadge color="orange">21.6K chats</TechBadge>, <TechBadge color="orange">58.7K messages</TechBadge>).
+                </li>
+                <li>
+                  <span className="text-[#fe8500] mr-1.5 font-bold">▪</span>
+                  Engineered <TechBadge>blockchain land records system</TechBadge> for <TechBadge>Palghar Collector Office</TechBadge> (<TechBadge color="orange">₹7,531 Cr compensation</TechBadge>, <TechBadge color="orange">16,375 records</TechBadge>).
+                </li>
+                <li>
+                  <span className="text-[#fe8500] mr-1.5 font-bold">▪</span>
+                  Spearheaded <TechBadge>Sanvichar board meeting engine</TechBadge> running <TechBadge color="orange">3 live government meetings</TechBadge> with bilingual transcription.
+                </li>
+              </ul>
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                <TechBadge>RAG Systems</TechBadge>
+                <TechBadge>Multi-Agent Crews</TechBadge>
+                <TechBadge>Govt Tech Specs</TechBadge>
+                <TechBadge>Production Scaling</TechBadge>
+                <TechBadge color="orange">99.9% Uptime</TechBadge>
+              </div>
             </div>
           </div>
         </section>
@@ -510,15 +720,23 @@ export default function Home() {
             <h2 className="text-xs font-mono tracking-widest text-[#fe8500] uppercase font-semibold">
               Education
             </h2>
-            <span className="text-[11px] font-mono text-[#105bff] font-medium">B.Tech (CSE)</span>
+            <HighlightPill variant="blue" icon="🎓">B.Tech (CSE)</HighlightPill>
           </div>
 
-          <div className="flex items-center justify-between text-xs text-zinc-300 p-4 rounded-xl bg-[#1b1d26] border border-[#2e3242]">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-zinc-300 p-4 sm:p-5 rounded-2xl bg-[#1b1d26] border border-[#2e3242]">
             <div>
-              <span className="text-white font-medium">B.Tech in Computer Science &amp; Engineering</span>
-              <p className="text-zinc-400">AKTU · Class of 2023</p>
+              <span className="text-white font-semibold text-sm">B.Tech in Computer Science &amp; Engineering</span>
+              <p className="text-zinc-400 pt-0.5">Dr. A.P.J. Abdul Kalam Technical University (AKTU) · Class of 2023</p>
+              <div className="flex flex-wrap gap-1.5 pt-2">
+                <TechBadge>Data Structures &amp; Algorithms</TechBadge>
+                <TechBadge>Machine Learning</TechBadge>
+                <TechBadge>DBMS</TechBadge>
+                <TechBadge>Operating Systems</TechBadge>
+                <TechBadge>Computer Networks</TechBadge>
+                <TechBadge>Distributed Systems</TechBadge>
+              </div>
             </div>
-            <span className="font-mono text-[#fe8500] font-bold text-sm">70%</span>
+            <HighlightPill variant="orange" icon="🏆">70% Aggregate</HighlightPill>
           </div>
         </section>
 
@@ -534,13 +752,16 @@ export default function Home() {
               </p>
             </div>
 
-            <a
-              href="mailto:mishraanmol258@gmail.com"
-              className="px-3.5 py-2 rounded-lg bg-[#105bff] hover:bg-[#105bff]/90 text-white text-xs font-mono inline-flex items-center gap-1.5 transition-all shadow-[0_0_16px_rgba(16,91,255,0.4)] w-fit"
-            >
-              <Mail className="w-3.5 h-3.5 text-[#fe8500]" />
-              <span>Get in Touch</span>
-            </a>
+            <div className="flex items-center gap-2">
+              <HighlightPill variant="orange" icon="⚡">Open for Tech Lead &amp; Advisory</HighlightPill>
+              <a
+                href="mailto:mishraanmol258@gmail.com"
+                className="px-3.5 py-1.5 rounded-lg bg-[#105bff] hover:bg-[#105bff]/90 text-white text-xs font-mono flex items-center gap-1.5 transition-all shadow-[0_0_16px_rgba(16,91,255,0.4)]"
+              >
+                <Mail className="w-3.5 h-3.5 text-white" />
+                <span>Get in Touch</span>
+              </a>
+            </div>
           </div>
 
           {/* Contact Bar */}
@@ -581,8 +802,8 @@ export default function Home() {
             </div>
 
             <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#fe8500] animate-pulse shadow-[0_0_8px_#fe8500]" />
-              <span>Noida, IN · IST</span>
+              <TechBadge color="orange">📍 Noida, IN · IST</TechBadge>
+              <TechBadge>⚡ Available Immediately</TechBadge>
             </div>
           </div>
         </footer>

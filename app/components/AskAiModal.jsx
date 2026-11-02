@@ -8,7 +8,7 @@ const KNOWLEDGE_BASE = [
   {
     triggers: ["smart city", "ai mitra", "citizen", "sambhaji", "government", "municipal"],
     answer:
-      "At Arixolve Ventures, Anmol built **AI Mitra**, a production RAG citizen chatbot for Chh. Sambhaji Nagar Municipal Corporation & Smart City. It has handled **21,596 citizen conversations** and **58,706 messages** (averaging 2.7 messages/chat), saving citizens over **16,197 hours**. Built with Python, LangChain, CrewAI, FAISS, and Next.js with bilingual support (English + Marathi) and voice STT/TTS.",
+      "At Arixolve Ventures, Anmol built **AI Mitra**, a production RAG citizen chatbot for Chh. Sambhaji Nagar Municipal Corporation & Smart City. It has handled **21,596 citizen conversations** and **58,706 messages** (averaging 2.7 messages/chat), saving citizens over **16,197 hours**. Built with Python, LangChain, CrewAI, Pinecone, and Next.js with bilingual support (English + Marathi) and voice STT/TTS.",
   },
   {
     triggers: ["esulabh", "blockchain", "land", "palghar", "collector"],
@@ -23,17 +23,22 @@ const KNOWLEDGE_BASE = [
   {
     triggers: ["acquired", "exit", "toasty", "launchpage", "saas", "products sold"],
     answer:
-      "In 2024, Anmol had **two self-built SaaS products acquired**: \n1. **toasty.ai**: Testimonial collection SaaS with embed widgets and automated review collection, acquired by Lumination.ai (USA).\n2. **launchpage.me**: Conversion-focused no-code waitlist builder and startup validator, acquired by a Canadian entrepreneur.",
+      "In 2024, Anmol had **two self-built SaaS products acquired**: \n1. **toasty.ai**: Testimonial collection SaaS handling 10+ GBs of multimedia testimonials rendered using custom Web Components (<custom-tag> HTML tag), acquired by Lumination.ai (USA).\n2. **launchpage.me**: Conversion-focused no-code waitlist builder and startup validator, acquired by a Canadian entrepreneur.",
+  },
+  {
+    triggers: ["vela", "vela.video", "video", "remotion", "motion graphics", "gemini"],
+    answer:
+      "Anmol built **vela.video** (https://www.vela.video/), an AI motion graphics video engine combining Remotion and the Google Gemini API with on-device browser export. It has attracted **3.3K unique visitors** and **4.7K page views** (1.2K from Google organic, 558 from ChatGPT organic).",
   },
   {
     triggers: ["tech stack", "skills", "technologies", "frameworks", "tools"],
     answer:
-      "**AI/ML**: RAG Pipelines, LangChain, CrewAI multi-agent orchestration, Vector DBs (FAISS, Pinecone), Prompt Engineering, Whisper STT/TTS.\n**Frontend**: Next.js (App Router, SSR, Server Actions), React 19, Tailwind CSS, Flutter.\n**Backend**: Python (FastAPI, Flask), Firebase (Firestore, Cloud Functions), REST APIs, Smart Contracts, Razorpay Route.",
+      "**AI/ML**: RAG Pipelines, LangChain, CrewAI multi-agent orchestration, Vector DBs (Pinecone), Prompt Engineering, Whisper STT/TTS.\n**Frontend**: Next.js (App Router, SSR, Server Actions), React 19, Tailwind CSS, Flutter, Remotion, Web Components.\n**Backend**: Python (FastAPI, Flask), Firebase (Firestore, Cloud Functions), REST APIs, Smart Contracts, Razorpay Route.",
   },
   {
     triggers: ["sanvichar", "board meeting", "whisper", "transcription", "marathi"],
     answer:
-      "Anmol built **Sanvichar**, an AI board meeting platform for Shivshahi Punarvasan Prakalp Ltd (Govt of Maharashtra). It hosted 3 live board meetings with real-time Whisper-based transcription, automated extraction of agenda items and votes, bilingual (English + Marathi) resolution summaries, and a diff-aware notes review editor.",
+      "Anmol built **Sanvichar** (https://www.sanvichar.online/), an AI board meeting platform for Shivshahi Punarvasan Prakalp Ltd (Govt of Maharashtra). It hosted 3 live board meetings with real-time Whisper-based transcription, automated extraction of agenda items and votes, bilingual (English + Marathi) resolution summaries, and a diff-aware notes review editor.",
   },
   {
     triggers: ["contact", "hire", "email", "reach", "linkedin", "phone"],
