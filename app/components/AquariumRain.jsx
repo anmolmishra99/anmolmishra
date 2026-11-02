@@ -25,12 +25,14 @@ export default function AquariumRain({
   const soundEnabledRef = useRef(soundEnabled);
   soundEnabledRef.current = soundEnabled;
 
-  // Fish state
-  const fish1Ref = useRef({ x: 80, yOffset: 18, vx: 0.9, dir: 1, tailFrame: 0 });
-  const fish2Ref = useRef({ x: 300, yOffset: 30, vx: -0.7, dir: -1, tailFrame: 0 });
+  // Fish state (smooth continuous infinite wrap across screen)
+  const fish1Ref = useRef({ x: 80, yOffset: 0, vx: 1.1, dir: 1, tailFrame: 0 });
+  const fish2Ref = useRef({ x: 500, yOffset: 6, vx: -0.85, dir: -1, tailFrame: 0 });
+  const fish3Ref = useRef({ x: -70, yOffset: -4, vx: 1.35, dir: 1, tailFrame: 0 });
   const [fishRenderState, setFishRenderState] = useState({
-    f1: { x: 80, dir: 1, frame: 0 },
-    f2: { x: 300, dir: -1, frame: 0 },
+    f1: { x: 80, dir: 1, frame: 0, yOffset: 0 },
+    f2: { x: 500, dir: -1, frame: 0, yOffset: 6 },
+    f3: { x: -70, dir: 1, frame: 0, yOffset: -4 },
   });
 
   const MAX_WATER_HEIGHT = 140; // max floor aquarium fill height (~18% of typical screen)
@@ -242,40 +244,47 @@ export default function AquariumRain({
     };
   }, [isDraining]);
 
-  // Gentle fish physics & swimming animation
+  // Gentle fish physics & continuous infinite swimming loop
   useEffect(() => {
     const fishTimer = setInterval(() => {
       const winW = typeof window !== "undefined" ? window.innerWidth : 1200;
 
-      // Fish 1 (Primary)
+      // Fish 1 (Primary - continuous swim Left -> Right, head forward)
       const f1 = fish1Ref.current;
       f1.x += f1.vx;
       f1.tailFrame = (f1.tailFrame + 1) % 4;
-      if (f1.x > winW - 50) {
-        f1.vx = -Math.abs(f1.vx);
-        f1.dir = -1;
-      } else if (f1.x < 30) {
-        f1.vx = Math.abs(f1.vx);
-        f1.dir = 1;
+      if (f1.x > winW + 45) {
+        // Exited right side -> smoothly enter from left side
+        f1.x = -45;
+        f1.yOffset = (Math.random() - 0.5) * 12;
       }
 
-      // Fish 2 (Little companion)
+      // Fish 2 (Companion - continuous swim Right -> Left, head forward)
       const f2 = fish2Ref.current;
       f2.x += f2.vx;
       f2.tailFrame = (f2.tailFrame + 1) % 4;
-      if (f2.x > winW - 40) {
-        f2.vx = -Math.abs(f2.vx);
-        f2.dir = -1;
-      } else if (f2.x < 20) {
-        f2.vx = Math.abs(f2.vx);
-        f2.dir = 1;
+      if (f2.x < -45) {
+        // Exited left side -> smoothly enter from right side
+        f2.x = winW + 45;
+        f2.yOffset = (Math.random() - 0.5) * 14;
+      }
+
+      // Fish 3 (Small companion - continuous swim Left -> Right, head forward)
+      const f3 = fish3Ref.current;
+      f3.x += f3.vx;
+      f3.tailFrame = (f3.tailFrame + 1) % 4;
+      if (f3.x > winW + 45) {
+        // Exited right side -> smoothly enter from left side
+        f3.x = -65;
+        f3.yOffset = (Math.random() - 0.5) * 10;
       }
 
       setFishRenderState({
-        f1: { x: f1.x, dir: f1.dir, frame: f1.tailFrame },
-        f2: { x: f2.x, dir: f2.dir, frame: f2.tailFrame },
+        f1: { x: f1.x, dir: f1.dir, frame: f1.tailFrame, yOffset: f1.yOffset },
+        f2: { x: f2.x, dir: f2.dir, frame: f2.tailFrame, yOffset: f2.yOffset },
+        f3: { x: f3.x, dir: f3.dir, frame: f3.tailFrame, yOffset: f3.yOffset },
       });
-    }, 90);
+    }, 60);
 
     return () => clearInterval(fishTimer);
   }, []);
@@ -400,31 +409,45 @@ export default function AquariumRain({
               />
             ))}
 
-            {/* Primary Pixel Fish (Swims when floor water depth is > 26px) */}
-            {waterHeight > 26 && (
+            {/* Primary Pixel Fish (Swims Left -> Right infinitely) */}
+            {waterHeight > 18 && fishRenderState?.f1 && (
               <div
                 className="absolute pointer-events-none transition-transform duration-75 select-none"
                 style={{
-                  left: `${fishRenderState.f1.x}px`,
-                  bottom: `${Math.min(waterHeight - 18, 22)}px`,
-                  transform: `scaleX(${fishRenderState.f1.dir})`,
+                  left: `${fishRenderState.f1.x ?? 80}px`,
+                  bottom: `${Math.max(6, Math.min(waterHeight - 16, 12 + (fishRenderState.f1.yOffset || 0)))}px`,
+                  transform: `scaleX(${fishRenderState.f1.dir ?? 1})`,
                 }}
               >
-                <PixelFishSprite frame={fishRenderState.f1.frame} />
+                <PixelFishSprite frame={fishRenderState.f1.frame ?? 0} />
               </div>
             )}
 
-            {/* Companion Mini Fish (Appears when water is deeper > 60px) */}
-            {waterHeight > 60 && (
+            {/* Companion Fish (Swims Right -> Left infinitely) */}
+            {waterHeight > 26 && fishRenderState?.f2 && (
               <div
                 className="absolute pointer-events-none transition-transform duration-75 select-none"
                 style={{
-                  left: `${fishRenderState.f2.x}px`,
-                  bottom: `${Math.min(waterHeight - 22, 40)}px`,
-                  transform: `scaleX(${fishRenderState.f2.dir}) scale(0.75)`,
+                  left: `${fishRenderState.f2.x ?? 500}px`,
+                  bottom: `${Math.max(8, Math.min(waterHeight - 16, 22 + (fishRenderState.f2.yOffset || 0)))}px`,
+                  transform: `scaleX(${fishRenderState.f2.dir ?? -1}) scale(0.85)`,
                 }}
               >
-                <PixelFishSprite frame={fishRenderState.f2.frame} isSmall={true} />
+                <PixelFishSprite frame={fishRenderState.f2.frame ?? 0} isSmall={true} />
+              </div>
+            )}
+
+            {/* Third Golden Mini Fish (Swims Left -> Right infinitely when water is deeper) */}
+            {waterHeight > 42 && fishRenderState?.f3 && (
+              <div
+                className="absolute pointer-events-none transition-transform duration-75 select-none"
+                style={{
+                  left: `${fishRenderState.f3.x ?? -70}px`,
+                  bottom: `${Math.max(10, Math.min(waterHeight - 16, 32 + (fishRenderState.f3.yOffset || 0)))}px`,
+                  transform: `scaleX(${fishRenderState.f3.dir ?? 1}) scale(0.7)`,
+                }}
+              >
+                <PixelFishSprite frame={fishRenderState.f3.frame ?? 0} isSmall={true} variant="orange" />
               </div>
             )}
 
@@ -455,10 +478,10 @@ export default function AquariumRain({
               <button
                 onClick={handleDrain}
                 disabled={isDraining}
-                className="text-[10px] text-zinc-400 hover:text-rose-400 transition-colors px-1"
+                className="text-[10px] cursor-pointer text-zinc-400 hover:text-rose-400 transition-colors px-1"
                 title="Drain water back to dry floor"
               >
-                {isDraining ? "Draining..." : "Drain 🕳️"}
+                {isDraining ? "Draining..." : "Drain water 🕳️"}
               </button>
             </div>
           </div>
@@ -478,9 +501,14 @@ export default function AquariumRain({
   );
 }
 
-// 8-bit Crisp Pixel Fish Sprite (18x10 px) with 2-frame tail wag
-function PixelFishSprite({ frame = 0, isSmall = false }) {
+// 8-bit Crisp Pixel Fish Sprite (18x10 px) naturally facing RIGHT with 2-frame tail wag
+function PixelFishSprite({ frame = 0, isSmall = false, variant = "blue" }) {
   const tailOffset = frame % 2 === 0 ? 0 : 1;
+  const isOrange = variant === "orange";
+
+  const primaryColor = isOrange ? "#fe8500" : "#105bff";
+  const secondaryColor = isOrange ? "#fde047" : "#38bdf8";
+  const accentColor = isOrange ? "#ffffff" : "#fe8500";
 
   return (
     <svg
@@ -491,29 +519,29 @@ function PixelFishSprite({ frame = 0, isSmall = false }) {
       className="pixelated drop-shadow-[0_2px_6px_rgba(16,91,255,0.7)]"
     >
       {/* Outer dark outline */}
-      <rect x="4" y="1" width="8" height="1" fill="#0f172a" />
-      <rect x="2" y="2" width="2" height="1" fill="#0f172a" />
-      <rect x="1" y="3" width="1" height="4" fill="#0f172a" />
-      <rect x="2" y="7" width="2" height="1" fill="#0f172a" />
-      <rect x="4" y="8" width="8" height="1" fill="#0f172a" />
-      <rect x="12" y="4" width="2" height="2" fill="#0f172a" />
+      <rect x="6" y="1" width="8" height="1" fill="#0f172a" />
+      <rect x="14" y="2" width="2" height="1" fill="#0f172a" />
+      <rect x="16" y="3" width="1" height="4" fill="#0f172a" />
+      <rect x="14" y="7" width="2" height="1" fill="#0f172a" />
+      <rect x="6" y="8" width="8" height="1" fill="#0f172a" />
+      <rect x="4" y="4" width="2" height="2" fill="#0f172a" />
 
-      {/* Royal Blue Body */}
-      <rect x="3" y="2" width="9" height="6" fill="#105bff" />
-      <rect x="5" y="3" width="6" height="4" fill="#38bdf8" />
+      {/* Main Body */}
+      <rect x="6" y="2" width="9" height="6" fill={primaryColor} />
+      <rect x="7" y="3" width="6" height="4" fill={secondaryColor} />
 
-      {/* Dorsal Fin (Warm Orange accent matching the theme) */}
-      <rect x="6" y="0" width="3" height="1" fill="#fe8500" />
-      <rect x="5" y="1" width="4" height="1" fill="#fe8500" />
+      {/* Dorsal Fin on Top (Orange accent) */}
+      <rect x="9" y="0" width="3" height="1" fill={accentColor} />
+      <rect x="8" y="1" width="5" height="1" fill={accentColor} />
 
-      {/* Eye */}
-      <rect x="3" y="3" width="2" height="2" fill="#ffffff" />
-      <rect x="3" y="3" width="1" height="1" fill="#09090b" />
+      {/* Eye at Front (Facing Right / Swimming Forward) */}
+      <rect x="13" y="3" width="2" height="2" fill="#ffffff" />
+      <rect x="14" y="3" width="1" height="1" fill="#09090b" />
 
-      {/* Animated Wagging Tail */}
-      <rect x="13" y={2 + tailOffset} width="2" height="6" fill="#105bff" />
-      <rect x="15" y={1 + tailOffset} width="2" height="8" fill="#38bdf8" />
-      <rect x="16" y={3 + tailOffset} width="2" height="4" fill="#fe8500" />
+      {/* Animated Wagging Tail at Back (Left) */}
+      <rect x="3" y={2 + tailOffset} width="2" height="6" fill={primaryColor} />
+      <rect x="1" y={1 + tailOffset} width="2" height="8" fill={secondaryColor} />
+      <rect x="0" y={3 + tailOffset} width="2" height="4" fill={accentColor} />
     </svg>
   );
 }

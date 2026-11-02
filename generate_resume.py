@@ -30,7 +30,7 @@ PERSONAL_INFO = {
     "headline": "RAG Pipelines · LLM Agents · Vector Databases · Voice AI · Python · Firebase | 3+ Years | Govt & Product Deployments | 2 Acquired Products",
     "email": "mishraanmol258@gmail.com",
     "phone": "+91-7275299418",
-    "location": "Noida / Mau, India",
+    "location": "Noida / Kanpur, India",
     "github": "github.com/anmolmishra99",
     "linkedin": "linkedin.com/in/anmolmishra99",
 }

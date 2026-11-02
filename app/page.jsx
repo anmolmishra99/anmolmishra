@@ -187,7 +187,7 @@ export default function Home() {
 
             <div className="flex items-center gap-1.5 pt-0.5 text-xs sm:text-sm text-zinc-400 font-mono">
               <span className="text-[#fe8500] text-sm">📍</span>
-              <span>Noida / Mau, India</span>
+              <span>Noida / Kanpur, India</span>
             </div>
 
             {/* Two highlight pills matching reference image */}
