@@ -2,6 +2,18 @@
 
 import React, { useState, useEffect, useRef } from "react";
 import { playBoatHorn } from "./SoundEffects";
+import {
+  Painter,
+  createFrame,
+  clearFrame,
+  composite,
+  Rng,
+  fit,
+  mix,
+  hex,
+} from "../lib/pixelfx/core/index.js";
+import { Smoke, cloud, spark } from "../lib/pixelfx/fx/projectiles/_lib.js";
+import { WATER, billow, ring } from "../lib/pixelfx/fx/water/_lib.js";
 
 const SHIP_QUOTES = [
   "RMS TITANIC AI · Full steam ahead! 🚢",
@@ -13,13 +25,39 @@ const SHIP_QUOTES = [
   "Toot toot! Unsinkable production AI 🚢",
 ];
 
+// Pixel resolution scale (2 CSS px = 1 pixelfx pixel for authentic crisp pixel art)
+const PIXEL_SCALE = 2;
+const CANVAS_CSS_H = 260;
+
 // Funnel positions relative to the 106px-wide Titanic sprite when facing RIGHT (direction = 1)
 // Funnels 1, 2, 3 were connected to the boiler rooms; Funnel 4 was ventilation.
 const FUNNEL_OFFSETS_RIGHT = [
-  { x: 34, y: 33, primary: true },
-  { x: 45, y: 33, primary: true },
-  { x: 56, y: 33, primary: true },
-  { x: 67, y: 33, primary: false },
+  { x: 34, y: 34, primary: true },
+  { x: 45, y: 34, primary: true },
+  { x: 56, y: 34, primary: true },
+  { x: 67, y: 34, primary: false },
+];
+
+// pixelfx ramps for Titanic coal/steam smoke, furnace glow, and sparks
+const SMOKE_HEX = [
+  "#232533",
+  "#34384b",
+  "#4c5268",
+  "#6c748c",
+  "#949db4",
+  "#c2c9d8",
+  "#eef2f8",
+];
+const FIRE_HEX = [
+  "#4a1712",
+  "#8a1f17",
+  "#c9281f",
+  "#f2561d",
+  "#ff8a2a",
+  "#ffc23d",
+  "#ffe26b",
+  "#fff3a6",
+  "#ffffff",
 ];
 
 export default function PixelCompanion({
@@ -33,35 +71,71 @@ export default function PixelCompanion({
   const [bubbleVisible, setBubbleVisible] = useState(false);
   const [quoteIdx, setQuoteIdx] = useState(0);
 
-  // Refs for smooth 60fps Canvas smoke simulation & ship movement
+  // Refs for pixelfx dual-buffer canvas & simulation
   const smokeCanvasRef = useRef(null);
   const posRef = useRef(120);
   const dirRef = useRef(1);
   const waterHeightRef = useRef(waterHeight);
-  const particlesRef = useRef([]);
+  const smokeSimRef = useRef(null);
+  const embersRef = useRef([]);
 
   useEffect(() => {
     waterHeightRef.current = waterHeight;
   }, [waterHeight]);
 
-  // 60FPS Ship Movement + Fluid Volumetric Smoke Simulation on HTML5 Canvas
+  // 60FPS Ship Movement + pixelfx Volumetric Pixel Smoke, Embers & Wake VFX
   useEffect(() => {
     const canvas = smokeCanvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
 
-    let animId;
-    let frameCount = 0;
-    const shipWidth = 106;
+    const rng = new Rng(7);
+    const smokeSim = new Smoke(rng);
+    smokeSimRef.current = smokeSim;
+
+    // Pre-fit pixelfx color ramps
+    const SM = fit(SMOKE_HEX, 7);
+    const F = fit(FIRE_HEX, 9);
+    const WR = [
+      mix(F[0], SM[0], 0.5),
+      mix(F[1], SM[1], 0.45),
+      mix(F[2], SM[2], 0.35),
+      F[3],
+      F[4],
+      F[6],
+      F[7],
+    ];
+    const SP = [F[7], F[6], F[4], F[3]];
+    const W_RAMP = fit(WATER, 8);
+
+    let frame = null;
+    let painter = null;
+    let imgData = null;
+    let pw = 0;
+    let ph = 0;
 
     const updateCanvasSize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = 240; // Lower 240px band above the bottom of the screen
+      pw = Math.max(160, Math.ceil(window.innerWidth / PIXEL_SCALE));
+      ph = Math.ceil(CANVAS_CSS_H / PIXEL_SCALE);
+      canvas.width = pw;
+      canvas.height = ph;
+      frame = createFrame(pw, ph, 0, 0);
+      painter = new Painter(frame);
+      imgData = ctx.createImageData(pw, ph);
     };
     updateCanvasSize();
     window.addEventListener("resize", updateCanvasSize);
 
-    const spawnPuff = (funnel, isBurst = false) => {
+    let animId;
+    let lastTime = performance.now();
+    let emitAcc = 0;
+    let ventAcc = 0;
+    let emberAcc = 0;
+    let wakeTime = 0;
+    let frameCount = 0;
+    const shipWidth = 106;
+
+    const spawnFunnelPuff = (funnel, isWhistle = false) => {
       const offsetX =
         dirRef.current === 1 ? funnel.x : shipWidth - funnel.x;
       const currentAlt =
@@ -69,46 +143,43 @@ export default function PixelCompanion({
           ? Math.max(-2, waterHeightRef.current - 6)
           : -3;
 
-      // Convert bottom-relative altitude to canvas Y coordinate
-      const startX =
-        posRef.current + offsetX + (Math.random() * 2.4 - 1.2);
-      const startY = canvas.height - (currentAlt + funnel.y);
+      // Convert CSS coordinates to pixelfx low-res pixel coordinates
+      const fx = (posRef.current + offsetX) / PIXEL_SCALE;
+      const fy = ph - (currentAlt + funnel.y) / PIXEL_SCALE;
 
-      particlesRef.current.push({
-        x: startX,
-        y: startY,
-        // Initial tight jet out of the funnel top
-        vx:
-          -dirRef.current * (0.45 + Math.random() * 0.35) +
-          (Math.random() - 0.5) * 0.2,
-        vy: -(0.75 + Math.random() * 0.35 + (isBurst ? 0.45 : 0)),
-        radius: funnel.primary
-          ? 2.8 + Math.random() * 1.2 + (isBurst ? 1.5 : 0)
-          : 1.8 + Math.random() * 0.7,
-        maxRadius: funnel.primary
-          ? 18 + Math.random() * 10 + (isBurst ? 6 : 0)
-          : 10 + Math.random() * 5,
-        age: 0,
-        maxAge: funnel.primary
-          ? 95 + Math.floor(Math.random() * 35)
-          : 55 + Math.floor(Math.random() * 20),
-        seed: Math.random() * Math.PI * 2,
-        turbulenceFreq: 0.04 + Math.random() * 0.03,
-        turbulenceAmp: 0.35 + Math.random() * 0.35,
-        // Slight variation in coal/steam tone
-        r: isBurst ? 235 : 195 + Math.floor(Math.random() * 35),
-        g: isBurst ? 242 : 205 + Math.floor(Math.random() * 35),
-        b: isBurst ? 250 : 220 + Math.floor(Math.random() * 30),
-        peakAlpha: funnel.primary ? (isBurst ? 0.55 : 0.36) : 0.18,
+      smokeSim.add({
+        x: fx + rng.range(-0.6, 0.6),
+        y: fy,
+        // Stream back opposite to the Titanic's heading + upward boiler draft
+        vx: -dirRef.current * rng.range(18, 30) + rng.range(-4, 4),
+        vy: -rng.range(isWhistle ? 22 : 13, isWhistle ? 32 : 20),
+        r0: funnel.primary ? rng.range(1.6, 2.3) : rng.range(1.1, 1.5),
+        r1: funnel.primary
+          ? rng.range(isWhistle ? 9.5 : 6.8, isWhistle ? 13 : 10.2)
+          : rng.range(3.8, 5.5),
+        life: funnel.primary
+          ? rng.range(1.5, 2.2)
+          : rng.range(0.9, 1.3),
+        drag: rng.range(1.3, 1.9),
+        rise: rng.range(5, 11),
+        grow: rng.range(1.5, 2.3),
+        curl: rng.range(-1.1, 1.1),
+        a: funnel.primary ? (isWhistle ? 0.85 : 0.68) : 0.4,
+        b: isWhistle ? 0.98 : rng.range(0.78, 0.94),
+        warm: funnel.primary ? (isWhistle ? 0.25 : 0.65) : 0.15,
       });
     };
 
-    const render = () => {
+    const render = (now) => {
+      const dt = Math.min(0.05, (now - lastTime) / 1000);
+      lastTime = now;
+      wakeTime += dt;
       frameCount++;
-      const winW = canvas.width;
 
-      // 1. Smoothly advance Titanic position
-      let nextX = posRef.current + dirRef.current * 0.65;
+      const winW = window.innerWidth;
+
+      // 1. Advance Titanic position smoothly across the bottom
+      let nextX = posRef.current + dirRef.current * 39 * dt;
       if (nextX >= winW - shipWidth - 16) {
         dirRef.current = -1;
         nextX = winW - shipWidth - 16;
@@ -123,88 +194,149 @@ export default function PixelCompanion({
         setPosX(nextX);
       }
 
-      // 2. Emit continuous volumetric smoke from the funnels
-      // Funnels 1, 2, 3 emit frequently so they form connected, billowing steamship plumes
-      if (frameCount % 3 === 0) {
-        spawnPuff(FUNNEL_OFFSETS_RIGHT[0]);
-        spawnPuff(FUNNEL_OFFSETS_RIGHT[1]);
-        spawnPuff(FUNNEL_OFFSETS_RIGHT[2]);
-      }
-      if (frameCount % 12 === 0) {
-        spawnPuff(FUNNEL_OFFSETS_RIGHT[3]);
+      // 2. Emit continuous pixelfx Smoke puffs from the 4 funnels
+      emitAcc += dt * 24;
+      while (emitAcc >= 1) {
+        emitAcc -= 1;
+        spawnFunnelPuff(FUNNEL_OFFSETS_RIGHT[0]);
+        spawnFunnelPuff(FUNNEL_OFFSETS_RIGHT[1]);
+        spawnFunnelPuff(FUNNEL_OFFSETS_RIGHT[2]);
       }
 
-      // 3. Clear & render volumetric smoke particles
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ventAcc += dt * 6;
+      while (ventAcc >= 1) {
+        ventAcc -= 1;
+        spawnFunnelPuff(FUNNEL_OFFSETS_RIGHT[3]);
+      }
 
-      const alive = [];
-      for (let i = 0; i < particlesRef.current.length; i++) {
-        const p = particlesRef.current[i];
-        p.age++;
-        if (p.age >= p.maxAge) continue;
+      // Spawn occasional hot coal embers/sparks from the primary boiler funnels
+      emberAcc += dt * 7;
+      while (emberAcc >= 1) {
+        emberAcc -= 1;
+        const fIdx = rng.int(0, 2);
+        const funnel = FUNNEL_OFFSETS_RIGHT[fIdx];
+        const offsetX =
+          dirRef.current === 1 ? funnel.x : shipWidth - funnel.x;
+        const currentAlt =
+          waterHeightRef.current > 0
+            ? Math.max(-2, waterHeightRef.current - 6)
+            : -3;
+        const fx = (posRef.current + offsetX) / PIXEL_SCALE;
+        const fy = ph - (currentAlt + funnel.y) / PIXEL_SCALE;
 
-        const t = p.age / p.maxAge; // 0 -> 1 lifecycle progress
+        embersRef.current.push({
+          x: fx + rng.range(-1, 1),
+          y: fy,
+          vx: -dirRef.current * rng.range(16, 42) + rng.range(-8, 8),
+          vy: -rng.range(14, 30),
+          age: 0,
+          life: rng.range(0.45, 0.9),
+          isStreak: rng.chance(0.45),
+        });
+      }
 
-        // Wind drag increases as smoke rises higher; upward buoyancy slows as it cools
-        const windDrift = -dirRef.current * (0.35 + t * 0.85);
-        // S-curve curl/distortion wave as the plume breaks up
-        const curlX =
-          Math.sin(p.age * p.turbulenceFreq + p.seed) *
-          (p.turbulenceAmp * (0.4 + t * 2.2));
-        const curlY =
-          Math.cos(p.age * p.turbulenceFreq * 0.8 + p.seed) *
-          (p.turbulenceAmp * 0.6 * t);
+      // 3. Update pixelfx simulations
+      smokeSim.update(dt);
 
-        p.x += p.vx * (1 - t * 0.4) + windDrift + curlX;
-        p.y += p.vy * (1 - t * 0.55) + curlY;
+      for (let i = embersRef.current.length - 1; i >= 0; i--) {
+        const e = embersRef.current[i];
+        e.age += dt;
+        if (e.age >= e.life) {
+          embersRef.current.splice(i, 1);
+          continue;
+        }
+        e.vx -= e.vx * 1.8 * dt;
+        e.vy += 18 * dt; // slight gravity after upward draft
+        e.x += e.vx * dt;
+        e.y += e.vy * dt;
+      }
 
-        // Radius expands nonlinearly (tight near stack, wide & billowy as it dissipates)
-        const currentRadius =
-          p.radius + (p.maxRadius - p.radius) * Math.pow(t, 0.75);
+      // 4. Draw into pixelfx dual buffers (color + additive light)
+      if (frame && painter && imgData) {
+        clearFrame(frame);
 
-        // Smooth fade-in at stack mouth, then gradual atmospheric dissolution
-        const alpha =
-          t < 0.1
-            ? (t / 0.1) * p.peakAlpha
-            : p.peakAlpha * Math.pow(1 - (t - 0.1) / 0.9, 1.6);
-
-        if (alpha > 0.005) {
-          ctx.save();
-          ctx.translate(p.x, p.y);
-          // Slight horizontal wind-shear elongation as smoke ages and distorts
-          const stretchX = 1 + t * 0.65;
-          const stretchY = Math.max(0.68, 1 - t * 0.22);
-          ctx.scale(stretchX, stretchY);
-
-          const grad = ctx.createRadialGradient(
-            0,
-            0,
-            currentRadius * 0.1,
-            0,
-            0,
-            currentRadius
-          );
-          grad.addColorStop(0, `rgba(${p.r}, ${p.g}, ${p.b}, ${alpha})`);
-          grad.addColorStop(
-            0.5,
-            `rgba(${Math.max(100, p.r - 35)}, ${Math.max(
-              110,
-              p.g - 35
-            )}, ${Math.max(130, p.b - 30)}, ${alpha * 0.55})`
-          );
-          grad.addColorStop(1, `rgba(100, 116, 139, 0)`);
-
-          ctx.fillStyle = grad;
-          ctx.beginPath();
-          ctx.arc(0, 0, currentRadius, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.restore();
+        // 4a. Draw merged volumetric pixel smoke cloud (lit crowns + shaded undersides + warm stack glow)
+        const puffs = smokeSim.puffs();
+        if (puffs.length > 0) {
+          cloud(painter, puffs, SM, WR, {
+            dens: 1.38,
+            max: 0.82,
+            lit: 1.45,
+          });
         }
 
-        alive.push(p);
+        // Warm internal furnace glow at the mouths of Funnels 1-3
+        const currentAlt =
+          waterHeightRef.current > 0
+            ? Math.max(-2, waterHeightRef.current - 6)
+            : -3;
+        for (let i = 0; i < 3; i++) {
+          const funnel = FUNNEL_OFFSETS_RIGHT[i];
+          const offsetX =
+            dirRef.current === 1 ? funnel.x : shipWidth - funnel.x;
+          const fx = (posRef.current + offsetX) / PIXEL_SCALE;
+          const fy = ph - (currentAlt + funnel.y) / PIXEL_SCALE;
+          painter.glow(fx, fy - 1, 7, F[4], 0.22);
+        }
+
+        // 4c. Draw hot coal embers & speed-stretched pixel sparks in the smoke trail
+        for (const e of embersRef.current) {
+          const k = 1 - e.age / e.life;
+          if (e.isStreak) {
+            spark(painter, e.x, e.y, e.vx, e.vy, k, SP, 0.35, 0.02, 5);
+          } else {
+            const c = k > 0.6 ? F[6] : k > 0.3 ? F[4] : F[2];
+            painter.px(e.x, e.y, c);
+            painter.glow(e.x, e.y, 3, c, 0.35 * k);
+          }
+        }
+
+        // 4d. Draw pixel bow wave & stern wake ripples along the hull waterline
+        const hullY = ph - (currentAlt + 3) / PIXEL_SCALE;
+        const bowX =
+          (posRef.current + (dirRef.current === 1 ? 94 : 12)) / PIXEL_SCALE;
+        const sternX =
+          (posRef.current + (dirRef.current === 1 ? 8 : 98)) / PIXEL_SCALE;
+
+        // Churning pixel foam billow at the raked Titanic bow
+        const bowPulse = 1.4 + 0.35 * Math.sin(wakeTime * 7);
+        billow(painter, bowX, hullY, bowPulse, W_RAMP, 0.9);
+        painter.glow(bowX, hullY, 5, W_RAMP[5], 0.22);
+
+        // Trailing stern wake foam & spreading surface ripple rings
+        for (let w = 0; w < 4; w++) {
+          const phase = ((wakeTime * 1.4 + w * 0.25) % 1);
+          const wx = sternX - dirRef.current * (3 + phase * 18);
+          const wy = hullY + Math.sin(wakeTime * 5 + w) * 0.4;
+          const fade = 1 - phase;
+          if (phase < 0.45) {
+            billow(painter, wx, wy, 1.3 * fade, W_RAMP, fade * 0.85);
+          }
+          ring(painter, wx, wy, 1.5 + phase * 7, 0.25, fade * 0.65, W_RAMP, {
+            n: 1,
+            half: 1,
+            hot: phase < 0.15,
+            seed: w + 1,
+          });
+        }
+
+        // Warm golden porthole glow cast onto the water alongside the hull
+        const midHullX = (posRef.current + shipWidth * 0.5) / PIXEL_SCALE;
+        painter.glowLine(
+          midHullX - 16,
+          hullY,
+          midHullX + 16,
+          hullY,
+          5,
+          hex("#f59e0b"),
+          0.16
+        );
+
+        // Composite color + additive light buffers into ImageData and paint to canvas
+        composite(frame, imgData.data, null, 0.85);
+        ctx.putImageData(imgData, 0, 0);
       }
 
-      particlesRef.current = alive;
       animId = requestAnimationFrame(render);
     };
 
@@ -215,7 +347,7 @@ export default function PixelCompanion({
     };
   }, []);
 
-  // Click to play ship horn sound ONLY (no jumping/bouncing) + steam whistle burst
+  // Click to play ship horn sound ONLY (no jumping/bouncing) + pixelfx steam whistle puffs
   const handleShipClick = (e) => {
     e.stopPropagation();
     if (soundEnabled) playBoatHorn();
@@ -224,34 +356,38 @@ export default function PixelCompanion({
     setQuoteIdx((prev) => (prev + 1) % SHIP_QUOTES.length);
     setBubbleVisible(true);
 
-    // Trigger extra steam puffs on horn blow
-    const canvas = smokeCanvasRef.current;
-    if (canvas) {
-      const shipWidth = 106;
-      const currentAlt =
-        waterHeightRef.current > 0
-          ? Math.max(-2, waterHeightRef.current - 6)
-          : -3;
+    const smokeSim = smokeSimRef.current;
+    const shipWidth = 106;
+    const currentAlt =
+      waterHeightRef.current > 0
+        ? Math.max(-2, waterHeightRef.current - 6)
+        : -3;
+    const ph = Math.ceil(CANVAS_CSS_H / PIXEL_SCALE);
+
+    // Trigger extra pixelfx white steam whistle puffs from the funnels
+    if (smokeSim) {
       FUNNEL_OFFSETS_RIGHT.forEach((funnel) => {
-        for (let k = 0; k < 3; k++) {
-          const offsetX =
-            dirRef.current === 1 ? funnel.x : shipWidth - funnel.x;
-          particlesRef.current.push({
-            x: posRef.current + offsetX + (Math.random() * 4 - 2),
-            y: canvas.height - (currentAlt + funnel.y) - k * 2,
-            vx: -dirRef.current * (0.5 + Math.random() * 0.4),
-            vy: -(1.0 + Math.random() * 0.45),
-            radius: 3.5 + Math.random() * 1.5,
-            maxRadius: 22 + Math.random() * 8,
-            age: 0,
-            maxAge: 100,
-            seed: Math.random() * Math.PI * 2,
-            turbulenceFreq: 0.05,
-            turbulenceAmp: 0.45,
-            r: 241,
-            g: 245,
-            b: 249,
-            peakAlpha: 0.5,
+        const offsetX =
+          dirRef.current === 1 ? funnel.x : shipWidth - funnel.x;
+        const fx = (posRef.current + offsetX) / PIXEL_SCALE;
+        const fy = ph - (currentAlt + funnel.y) / PIXEL_SCALE;
+
+        for (let k = 0; k < 4; k++) {
+          smokeSim.add({
+            x: fx + (Math.random() - 0.5) * 2,
+            y: fy - k * 1.2,
+            vx: -dirRef.current * (15 + Math.random() * 18),
+            vy: -(24 + Math.random() * 16),
+            r0: 2.0,
+            r1: 10 + Math.random() * 4,
+            life: 1.6 + Math.random() * 0.5,
+            drag: 1.6,
+            rise: 9,
+            grow: 2.2,
+            curl: (Math.random() - 0.5) * 1.6,
+            a: 0.85,
+            b: 0.98,
+            warm: 0.35,
           });
         }
       });
@@ -268,11 +404,14 @@ export default function PixelCompanion({
 
   return (
     <>
-      {/* 60FPS Volumetric Smoke Canvas (Soft radial-gradient plumes that billow, distort & dissolve) */}
+      {/* pixelfx Dual-Buffer (Color + Light) Pixel Art VFX Canvas */}
       <canvas
         ref={smokeCanvasRef}
-        className="fixed bottom-0 left-0 right-0 pointer-events-none select-none z-25"
-        style={{ height: "240px" }}
+        className="fixed bottom-0 left-0 right-0 w-full pointer-events-none select-none z-25 pixelated"
+        style={{
+          height: `${CANVAS_CSS_H}px`,
+          imageRendering: "pixelated",
+        }}
       />
 
       {/* Main Moving RMS Titanic Container */}
