@@ -12,6 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+  metadataBase: new URL("https://anmolmishra.dev"),
   title: "Anmol Mishra — AI/ML Engineer & Technical Lead",
   description:
     "AI/ML Engineer & Technical Lead with 3+ years shipping citizen AI for Indian governments (21.6K+ chats, ₹7,531 Cr tracked) and scaling SaaS (2 products acquired in 2024, now building Payge).",
@@ -26,14 +27,32 @@ export const metadata = {
     "Payge",
     "AI Mitra",
   ],
-  authors: [{ name: "Anmol Mishra" }],
+  authors: [{ name: "Anmol Mishra", url: "https://anmolmishra.dev" }],
+  creator: "Anmol Mishra",
   openGraph: {
     title: "Anmol Mishra — AI/ML Engineer & Technical Lead",
     description:
-      "AI/ML Engineer & Technical Lead building production AI and SaaS. Two products acquired in 2024.",
+      "AI/ML Engineer & Technical Lead with 3+ years shipping citizen AI for Indian governments (21.6K+ chats, ₹7,531 Cr tracked) and scaling SaaS (2 products acquired in 2024, now building Payge).",
     url: "https://anmolmishra.dev",
     siteName: "Anmol Mishra Portfolio",
+    locale: "en_US",
     type: "website",
+    images: [
+      {
+        url: "/og-image.png",
+        width: 1200,
+        height: 630,
+        alt: "Anmol Mishra — AI/ML Engineer & Technical Lead (3+ Years Production AI, 2 Acquired SaaS)",
+        type: "image/png",
+      },
+    ],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Anmol Mishra — AI/ML Engineer & Technical Lead",
+    description:
+      "AI/ML Engineer & Technical Lead with 3+ years shipping citizen AI for Indian governments (21.6K+ chats, ₹7,531 Cr tracked) and scaling SaaS (2 products acquired in 2024, now building Payge).",
+    images: ["/og-image.png"],
   },
 };
 
